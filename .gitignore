@@ -91,3 +91,6 @@ ENV/
 #Data
 #   Data files too large for github
 data
+
+#PyCharm
+.idea
