@@ -72,7 +72,7 @@ class ReadCount:
             for line in f:
                 debug = line.strip()
                 line = line.strip().split('\t')
-                chromosome, start, stop, reference, variant = line
+                chromosome, start, stop, reference, variant, call = line
                 start = int(start)
                 stop = int(stop)
                 site = '{0}:{1}'.format(chromosome, start)
@@ -81,13 +81,10 @@ class ReadCount:
                 if reference == '-':
                     self.flatten_base_metrics(self.read_count_dict[site]['ref'], site, sample_prepend_string+'_ref')
                     self.flatten_base_metrics('+{0}'.format(variant), site, sample_prepend_string+'_var')
-                    # This dropping the counts at other positions could eliminate some real signal
-                    self.remove_extra_indel_counts(chromosome, start, stop)
                 # deletions
                 elif variant == '-':
                     self.flatten_base_metrics(self.read_count_dict[site]['ref'], site, sample_prepend_string+'_ref')
                     self.flatten_base_metrics('-{0}'.format(reference), site, sample_prepend_string+'_var')
-                    self.remove_extra_indel_counts(chromosome, start, stop)
                 # snvs
                 else:
                     self.flatten_base_metrics(reference, site, sample_prepend_string+'_ref' )
@@ -100,11 +97,21 @@ class ReadCount:
                 self.read_count_dict[site].pop('bases')
                 self.read_count_dict[site]['ref'] = reference
                 self.read_count_dict[site]['var'] = variant
+                self.read_count_dict[site]['call'] = call
                 self.read_count_dict[site]['stop'] = stop
                 self.read_count_dict[site]['start'] = self.read_count_dict[site].pop('position')
                 self.read_count_dict[site][sample_prepend_string+'_depth'] = self.read_count_dict[site].pop('depth')
         # print(self.read_count_dict)
+        # This dropping the counts at other positions could eliminate some real signal
+        keys_to_remove = []
+        for key in self.read_count_dict:
+            #remove extra bam-readcount indel counts
+            if 'call' not in self.read_count_dict[key]:
+                keys_to_remove.append(key)
+        for key in keys_to_remove:
+            self.read_count_dict.pop(key)
         self.read_count_df = pd.DataFrame.from_dict(self.read_count_dict,orient='index')
+        self.read_count_df[sample_prepend_string+'_VAF']=self.read_count_df[sample_prepend_string+'_var_count']/self.read_count_df[sample_prepend_string+'_depth']
         return self.read_count_df
 
     def remove_extra_indel_counts(self, chromosome, start, stop):

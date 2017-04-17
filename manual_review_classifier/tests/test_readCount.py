@@ -23,7 +23,6 @@ class TestReadCount(TestCase):
     def test_compute_variant_metrics(self):
         data = self.read_count.compute_variant_metrics(TEST_DATA_ROOT +
                                                        'tst1_full.bed', 'normal_1')
-        # print(data.columns)
         self.assertTrue(all(data.columns ==
                             ['chromosome', 'ref', 'normal_1_ref_count',
                              'normal_1_ref_avg_mapping_quality',
@@ -48,8 +47,8 @@ class TestReadCount(TestCase):
                              'normal_1_var_avg_distance_to_q2_start_in_q2_reads',
                              'normal_1_var_avg_clipped_length',
                              'normal_1_var_avg_distance_to_effective_3p_end',
-                             'normal_1_other_bases_count', 'var',
-                             'stop', 'start', 'normal_1_depth']))
+                             'normal_1_other_bases_count', 'var', 'call',
+                             'stop', 'start', 'normal_1_depth', 'normal_1_VAF']))
 # ['chromosome', 'start', 'stop',
 # 'ref', 'var', 'depth','tumor_vaf',
 # 'tumor_var_base_count',
