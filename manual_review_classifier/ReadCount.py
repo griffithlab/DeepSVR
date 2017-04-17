@@ -56,7 +56,7 @@ class ReadCount:
                 counts[position] = metrics
         return counts
 
-    def compute_variant_metrics(self, var_bed_file_path):
+    def compute_variant_metrics(self, var_bed_file_path, sample_prepend_string):
         """
         
         Args:
@@ -79,29 +79,30 @@ class ReadCount:
 
                 # insersions
                 if reference == '-':
-                    self.flatten_base_metrics(self.read_count_dict[site]['ref'], site, 'ref')
-                    self.flatten_base_metrics('+{0}'.format(variant), site, 'var')
+                    self.flatten_base_metrics(self.read_count_dict[site]['ref'], site, sample_prepend_string+'_ref')
+                    self.flatten_base_metrics('+{0}'.format(variant), site, sample_prepend_string+'_var')
                     # This dropping the counts at other positions could eliminate some real signal
                     self.remove_extra_indel_counts(chromosome, start, stop)
                 # deletions
                 elif variant == '-':
-                    self.flatten_base_metrics(self.read_count_dict[site]['ref'], site, 'ref')
-                    self.flatten_base_metrics('-{0}'.format(reference), site, 'var')
+                    self.flatten_base_metrics(self.read_count_dict[site]['ref'], site, sample_prepend_string+'_ref')
+                    self.flatten_base_metrics('-{0}'.format(reference), site, sample_prepend_string+'_var')
                     self.remove_extra_indel_counts(chromosome, start, stop)
                 # snvs
                 else:
-                    self.flatten_base_metrics(reference, site, 'ref' )
-                    self.flatten_base_metrics(variant, site, 'var')
+                    self.flatten_base_metrics(reference, site, sample_prepend_string+'_ref' )
+                    self.flatten_base_metrics(variant, site, sample_prepend_string+'_var')
                 other_bases_count = 0
                 for base in self.read_count_dict[site]['bases']:
                     #TODO check if other base metrics are nearly identical due to proximity
                     other_bases_count += self.read_count_dict[site]['bases'][base]['count']
-                self.read_count_dict[site]['other_bases_count'] = other_bases_count
+                self.read_count_dict[site][sample_prepend_string+'_other_bases_count'] = other_bases_count
                 self.read_count_dict[site].pop('bases')
                 self.read_count_dict[site]['ref'] = reference
                 self.read_count_dict[site]['var'] = variant
-                self.read_count_dict[site]['stop']= stop
+                self.read_count_dict[site]['stop'] = stop
                 self.read_count_dict[site]['start'] = self.read_count_dict[site].pop('position')
+                self.read_count_dict[site][sample_prepend_string+'_depth'] = self.read_count_dict[site].pop('depth')
         # print(self.read_count_dict)
         self.read_count_df = pd.DataFrame.from_dict(self.read_count_dict,orient='index')
         return self.read_count_df
