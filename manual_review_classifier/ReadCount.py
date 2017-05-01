@@ -1,7 +1,7 @@
 import re
 import pandas as pd
+import copy
 from manual_review_classifier.utils import to_numeric
-
 
 BASE_METRICS = ['count', 'avg_mapping_quality', 'avg_basequality',
                 'avg_se_mapping_quality', 'num_plus_strand',
@@ -9,7 +9,8 @@ BASE_METRICS = ['count', 'avg_mapping_quality', 'avg_basequality',
                 'avg_num_mismaches_as_fraction', 'avg_sum_mismatch_qualities',
                 'num_q2_containing_reads',
                 'avg_distance_to_q2_start_in_q2_reads',
-                 'avg_clipped_length', 'avg_distance_to_effective_3p_end']
+                'avg_clipped_length', 'avg_distance_to_effective_3p_end']
+
 
 class ReadCount:
     """Parse bam-readcount out into dict or pandas.Dataframe
@@ -56,7 +57,8 @@ class ReadCount:
                 counts[position] = metrics
         return counts
 
-    def compute_variant_metrics(self, var_bed_file_path, sample_prepend_string):
+    def compute_variant_metrics(self, var_bed_file_path,
+                                sample_prepend_string):
         """
         
         Args:
@@ -65,7 +67,7 @@ class ReadCount:
         Returns:
              pandas.Dataframe of variant centric read count data 
         """
-        # TODO write code that specifically handles snvs and indels
+        self.bam_readcount_keys = list(self.read_count_dict.keys())
         if len(self.read_count_df) > 0:
             return self.read_count_df
         with open(var_bed_file_path, 'r') as f:
@@ -75,51 +77,78 @@ class ReadCount:
                 chromosome, start, stop, reference, variant, call = line
                 start = int(start)
                 stop = int(stop)
-                site = '{0}:{1}'.format(chromosome, start)
-
-                # insersions
+                bam_readcount_site = '{0}:{1}'.format(chromosome, start)
+                variant_site = '{0}:{1}{2}>{3}'.format(chromosome, start, reference,
+                                               variant)
+                # insertions
                 if reference == '-':
-                    self.flatten_base_metrics(self.read_count_dict[site]['ref'], site, sample_prepend_string+'_ref')
-                    self.flatten_base_metrics('+{0}'.format(variant), site, sample_prepend_string+'_var')
+                    try:
+                        self.flatten_base_metrics(
+                            self.read_count_dict[bam_readcount_site]['ref'], bam_readcount_site, variant_site,
+                            sample_prepend_string + '_ref')
+                    except KeyError:
+                        # bamreadcout does not output metrics for zero depth sites
+                        self._add_zero_depth_readcount_to_dict(reference, bam_readcount_site, variant_site, sample_prepend_string + '_ref')
+                    self.flatten_base_metrics('+{0}'.format(variant), bam_readcount_site, variant_site,
+                                              sample_prepend_string + '_var')
                 # deletions
                 elif variant == '-':
-                    self.flatten_base_metrics(self.read_count_dict[site]['ref'], site, sample_prepend_string+'_ref')
-                    self.flatten_base_metrics('-{0}'.format(reference), site, sample_prepend_string+'_var')
+                    try:
+                        self.flatten_base_metrics(
+                            self.read_count_dict[bam_readcount_site]['ref'], bam_readcount_site, variant_site,
+                            sample_prepend_string + '_ref')
+                    except KeyError:
+                        self._add_zero_depth_readcount_to_dict(reference, bam_readcount_site, variant_site,
+                                                  sample_prepend_string + '_ref')
+                    self.flatten_base_metrics('-{0}'.format(reference), bam_readcount_site, variant_site,
+                                              sample_prepend_string + '_var')
                 # snvs
                 else:
-                    self.flatten_base_metrics(reference, site, sample_prepend_string+'_ref' )
-                    self.flatten_base_metrics(variant, site, sample_prepend_string+'_var')
+                    self.flatten_base_metrics(reference, bam_readcount_site, variant_site,
+                                              sample_prepend_string + '_ref')
+                    self.flatten_base_metrics(variant, bam_readcount_site, variant_site,
+                                              sample_prepend_string + '_var')
                 other_bases_count = 0
-                for base in self.read_count_dict[site]['bases']:
-                    #TODO check if other base metrics are nearly identical due to proximity
-                    other_bases_count += self.read_count_dict[site]['bases'][base]['count']
-                self.read_count_dict[site][sample_prepend_string+'_other_bases_count'] = other_bases_count
-                self.read_count_dict[site].pop('bases')
-                self.read_count_dict[site]['ref'] = reference
-                self.read_count_dict[site]['var'] = variant
-                self.read_count_dict[site]['call'] = call
-                self.read_count_dict[site]['stop'] = stop
-                self.read_count_dict[site]['start'] = self.read_count_dict[site].pop('position')
-                self.read_count_dict[site][sample_prepend_string+'_depth'] = self.read_count_dict[site].pop('depth')
-        # print(self.read_count_dict)
+                try:
+                    for base in self.read_count_dict[bam_readcount_site]['bases']:
+                        # TODO check if other base metrics are nearly identical due to proximity
+                        if base not in self.read_count_dict[bam_readcount_site]['seen_base']:
+                            other_bases_count += \
+                                self.read_count_dict[bam_readcount_site]['bases'][base]['count']
+                    self.read_count_dict[bam_readcount_site].pop('seen_base')
+                except KeyError:
+                    print(chromosome, start, stop, reference, variant)
+                    print(self.read_count_dict[bam_readcount_site])
+                    raise KeyError
+                self.read_count_dict[variant_site][
+                    sample_prepend_string + '_other_bases_count'] = other_bases_count
+                # self.read_count_dict[bam_readcount_site].pop('bases')
+                self.read_count_dict[variant_site]['chromosome'] = chromosome
+                self.read_count_dict[variant_site]['ref'] = reference
+                self.read_count_dict[variant_site]['var'] = variant
+                self.read_count_dict[variant_site]['call'] = call
+                self.read_count_dict[variant_site]['stop'] = stop
+                self.read_count_dict[variant_site]['start'] = self.read_count_dict[
+                    bam_readcount_site]['position']
+                self.read_count_dict[variant_site][sample_prepend_string + '_depth'] = \
+                self.read_count_dict[bam_readcount_site]['depth']
+        # This will delete all the bam-readcount keys including count of other positions from indels
         # This dropping the counts at other positions could eliminate some real signal
-        keys_to_remove = []
-        for key in self.read_count_dict:
-            #remove extra bam-readcount indel counts
-            if 'call' not in self.read_count_dict[key]:
-                keys_to_remove.append(key)
-        for key in keys_to_remove:
+        for key in self.bam_readcount_keys:
             self.read_count_dict.pop(key)
-        self.read_count_df = pd.DataFrame.from_dict(self.read_count_dict,orient='index')
-        self.read_count_df[sample_prepend_string+'_VAF']=self.read_count_df[sample_prepend_string+'_var_count']/self.read_count_df[sample_prepend_string+'_depth']
+        self.read_count_df = pd.DataFrame.from_dict(self.read_count_dict,
+                                                    orient='index')
+        self.read_count_df[sample_prepend_string + '_VAF'] = \
+        self.read_count_df[sample_prepend_string + '_var_count'] / \
+        self.read_count_df[sample_prepend_string + '_depth']
         return self.read_count_df
 
     def remove_extra_indel_counts(self, chromosome, start, stop):
-        for i in range(start + 1, stop +1 ):
+        for i in range(start + 1, stop + 1):
             remove_site = '{0}:{1}'.format(chromosome, i)
             self.read_count_dict.pop(remove_site)
 
-    def flatten_base_metrics(self, base_key, site, prepend_string):
+    def flatten_base_metrics(self, base_key, bam_readcount_site, variant_site, prepend_string):
         """ Renames the base metrics and flatten the data into the site level
         
         :param base_key (str): Key for the reference or variant 
@@ -128,13 +157,105 @@ class ReadCount:
         """
 
         try:
-            for metric_key in self.read_count_dict[site]['bases'][base_key]:
-                new_key = '{0}_{1}'.format(prepend_string, metric_key)
-                self.read_count_dict[site][new_key] = \
-                    self.read_count_dict[site]['bases'][base_key][metric_key]
             # Remove ref or var metrics so counts for other bases can be summed
-            self.read_count_dict[site]['bases'].pop(base_key)
+            self.read_count_dict[bam_readcount_site].setdefault('seen_base',
+                                                                []).append(
+                                                                    base_key)
+            for metric_key in self.read_count_dict[bam_readcount_site]['bases'][base_key]:
+                new_key = '{0}_{1}'.format(prepend_string, metric_key)
+                self.read_count_dict.setdefault(variant_site, {})
+                self.read_count_dict[variant_site][new_key] = \
+                    self.read_count_dict[bam_readcount_site]['bases'][base_key][metric_key]
+
         except KeyError:
+            # bam-readcount does not output zero depth sites, this adds them to the dictionary assuming that the keyError was raised on the ref call
+            if bam_readcount_site not in self.read_count_dict:
+                self._add_zero_depth_readcount_to_dict(base_key,
+                                                       bam_readcount_site,
+                                                       variant_site,
+                                                       prepend_string)
+            else:
             # add all zero metrics for indels absent from count file
-            keys = ['{0}_{1}'.format(prepend_string, i) for i in BASE_METRICS]
-            self.read_count_dict[site].update(dict.fromkeys(keys, 0))
+                keys = ['{0}_{1}'.format(prepend_string, i) for i in BASE_METRICS]
+                # self.read_count_dict[variant_site]= copy.deepcopy(self.read_count_dict[bam_readcount_site])
+                # self.read_count_dict[variant_site].pop('bases')
+                self.read_count_dict.setdefault(variant_site, {}).update(dict.fromkeys(keys, 0))
+
+
+
+    def _add_zero_depth_readcount_to_dict(self, base_key, bam_readcount_site, variant_site, prepend_string ):
+        variant_site_search = re.search('(\w+):(\d+)[\w|-]+>[\w|-]+', variant_site)
+        chromosome = variant_site_search.group(1)
+        position = variant_site_search.group(2)
+        self.bam_readcount_keys.append(bam_readcount_site)
+        self.read_count_dict[bam_readcount_site] = {
+                        'bases': {'A': {'avg_basequality': 0.0,
+                                        'avg_clipped_length': 0.0,
+                                        'avg_distance_to_effective_3p_end': 0.0,
+                                        'avg_distance_to_q2_start_in_q2_reads': 0.0,
+                                        'avg_mapping_quality': 0.0,
+                                        'avg_num_mismaches_as_fraction': 0.0,
+                                        'avg_pos_as_fraction': 0.0,
+                                        'avg_se_mapping_quality': 0.0,
+                                        'avg_sum_mismatch_qualities': 0.0,
+                                        'count': 0,
+                                        'num_minus_strand': 0,
+                                        'num_plus_strand': 0,
+                                        'num_q2_containing_reads': 0},
+                                  'C': {'avg_basequality': 0.0,
+                                        'avg_clipped_length': 0.0,
+                                        'avg_distance_to_effective_3p_end': 0.0,
+                                        'avg_distance_to_q2_start_in_q2_reads': 0.0,
+                                        'avg_mapping_quality': 0.0,
+                                        'avg_num_mismaches_as_fraction': 0.0,
+                                        'avg_pos_as_fraction': 0.0,
+                                        'avg_se_mapping_quality': 0.0,
+                                        'avg_sum_mismatch_qualities': 0.0,
+                                        'count': 0,
+                                        'num_minus_strand': 0,
+                                        'num_plus_strand': 0,
+                                        'num_q2_containing_reads': 0},
+                                  'G': {'avg_basequality': 0.0,
+                                        'avg_clipped_length': 0.0,
+                                        'avg_distance_to_effective_3p_end': 0.0,
+                                        'avg_distance_to_q2_start_in_q2_reads': 0.0,
+                                        'avg_mapping_quality': 0.0,
+                                        'avg_num_mismaches_as_fraction': 0.0,
+                                        'avg_pos_as_fraction': 0.0,
+                                        'avg_se_mapping_quality': 0.0,
+                                        'avg_sum_mismatch_qualities': 0.0,
+                                        'count': 0,
+                                        'num_minus_strand': 0,
+                                        'num_plus_strand': 0,
+                                        'num_q2_containing_reads': 0},
+                                  'N': {'avg_basequality': 0.0,
+                                        'avg_clipped_length': 0.0,
+                                        'avg_distance_to_effective_3p_end': 0.0,
+                                        'avg_distance_to_q2_start_in_q2_reads': 0.0,
+                                        'avg_mapping_quality': 0.0,
+                                        'avg_num_mismaches_as_fraction': 0.0,
+                                        'avg_pos_as_fraction': 0.0,
+                                        'avg_se_mapping_quality': 0.0,
+                                        'avg_sum_mismatch_qualities': 0.0,
+                                        'count': 0,
+                                        'num_minus_strand': 0,
+                                        'num_plus_strand': 0,
+                                        'num_q2_containing_reads': 0},
+                                  'T': {'avg_basequality': 0.0,
+                                        'avg_clipped_length': 0.0,
+                                        'avg_distance_to_effective_3p_end': 0.0,
+                                        'avg_distance_to_q2_start_in_q2_reads': 0.0,
+                                        'avg_mapping_quality': 0.0,
+                                        'avg_num_mismaches_as_fraction': 0.0,
+                                        'avg_pos_as_fraction': 0.0,
+                                        'avg_se_mapping_quality': 0.0,
+                                        'avg_sum_mismatch_qualities': 0.0,
+                                        'count': 0,
+                                        'num_minus_strand': 0,
+                                        'num_plus_strand': 0,
+                                        'num_q2_containing_reads': 0}},
+                        'chromosome': chromosome,
+                        'depth': 0,
+                        'position': position,
+                        'ref': base_key}
+        self.flatten_base_metrics(base_key, bam_readcount_site, variant_site, prepend_string)

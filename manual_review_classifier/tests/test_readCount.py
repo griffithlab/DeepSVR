@@ -24,11 +24,12 @@ class TestReadCount(TestCase):
         data = self.read_count.compute_variant_metrics(TEST_DATA_ROOT +
                                                        'tst1_full.bed', 'normal_1')
         self.assertTrue(all(data.columns ==
-                            ['chromosome', 'ref', 'normal_1_ref_count',
+                            ['normal_1_ref_count',
                              'normal_1_ref_avg_mapping_quality',
                              'normal_1_ref_avg_basequality',
                              'normal_1_ref_avg_se_mapping_quality',
-                             'normal_1_ref_num_plus_strand', 'normal_1_ref_num_minus_strand',
+                             'normal_1_ref_num_plus_strand',
+                             'normal_1_ref_num_minus_strand',
                              'normal_1_ref_avg_pos_as_fraction',
                              'normal_1_ref_avg_num_mismaches_as_fraction',
                              'normal_1_ref_avg_sum_mismatch_qualities',
@@ -37,18 +38,29 @@ class TestReadCount(TestCase):
                              'normal_1_ref_avg_clipped_length',
                              'normal_1_ref_avg_distance_to_effective_3p_end',
                              'normal_1_var_count',
-                             'normal_1_var_avg_mapping_quality', 'normal_1_var_avg_basequality',
+                             'normal_1_var_avg_mapping_quality',
+                             'normal_1_var_avg_basequality',
                              'normal_1_var_avg_se_mapping_quality',
                              'normal_1_var_num_plus_strand',
-                             'normal_1_var_num_minus_strand', 'normal_1_var_avg_pos_as_fraction',
+                             'normal_1_var_num_minus_strand',
+                             'normal_1_var_avg_pos_as_fraction',
                              'normal_1_var_avg_num_mismaches_as_fraction',
                              'normal_1_var_avg_sum_mismatch_qualities',
                              'normal_1_var_num_q2_containing_reads',
                              'normal_1_var_avg_distance_to_q2_start_in_q2_reads',
                              'normal_1_var_avg_clipped_length',
                              'normal_1_var_avg_distance_to_effective_3p_end',
-                             'normal_1_other_bases_count', 'var', 'call',
+                             'normal_1_other_bases_count', 'chromosome', 'ref',
+                             'var', 'call',
                              'stop', 'start', 'normal_1_depth', 'normal_1_VAF']))
+        # Check that the read counts add up to the depth
+        self.assertTrue(len(data[data.normal_1_depth==data.normal_1_other_bases_count+data.normal_1_ref_count+data.normal_1_var_count]) == len(data))
+
+        # rc = ReadCount(
+        #     'data/bam-read-counts/normal/H_JG-300000/f46917fb3bb042ba8a4720964e94cd45.counts')
+        # rc.compute_variant_metrics(
+        #     'data/bam-read-counts/normal/H_JG-300000/H_JG-300000_full.bed',
+        #     'tumor_1')
 # ['chromosome', 'start', 'stop',
 # 'ref', 'var', 'depth','tumor_vaf',
 # 'tumor_var_base_count',
