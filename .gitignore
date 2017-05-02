@@ -1,5 +1,3 @@
-notebooks/parse\ bam\ read\ count.ipynb
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

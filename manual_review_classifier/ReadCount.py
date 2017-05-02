@@ -72,7 +72,6 @@ class ReadCount:
             return self.read_count_df
         with open(var_bed_file_path, 'r') as f:
             for line in f:
-                debug = line.strip()
                 line = line.strip().split('\t')
                 chromosome, start, stop, reference, variant, call = line
                 start = int(start)
@@ -80,6 +79,9 @@ class ReadCount:
                 bam_readcount_site = '{0}:{1}'.format(chromosome, start)
                 variant_site = '{0}:{1}{2}>{3}'.format(chromosome, start, reference,
                                                variant)
+                # If variant is duplicated in bed file move to next
+                if variant_site in self.read_count_dict.keys():
+                    continue
                 # insertions
                 if reference == '-':
                     try:
@@ -128,19 +130,31 @@ class ReadCount:
                 self.read_count_dict[variant_site]['var'] = variant
                 self.read_count_dict[variant_site]['call'] = call
                 self.read_count_dict[variant_site]['stop'] = stop
-                self.read_count_dict[variant_site]['start'] = self.read_count_dict[
-                    bam_readcount_site]['position']
+                self.read_count_dict[variant_site]['start'] = int(self.read_count_dict[
+                    bam_readcount_site]['position'])
                 self.read_count_dict[variant_site][sample_prepend_string + '_depth'] = \
                 self.read_count_dict[bam_readcount_site]['depth']
+
+
         # This will delete all the bam-readcount keys including count of other positions from indels
         # This dropping the counts at other positions could eliminate some real signal
         for key in self.bam_readcount_keys:
             self.read_count_dict.pop(key)
         self.read_count_df = pd.DataFrame.from_dict(self.read_count_dict,
                                                     orient='index')
+
         self.read_count_df[sample_prepend_string + '_VAF'] = \
         self.read_count_df[sample_prepend_string + '_var_count'] / \
         self.read_count_df[sample_prepend_string + '_depth']
+        # set VAF to zero when denomitator is zero
+        self.read_count_df.loc[self.read_count_df[sample_prepend_string + '_depth'] == 0, sample_prepend_string + '_VAF'] = 0
+        bed_df = pd.read_csv(var_bed_file_path, sep='\t', names=['chromosome','start','stop','ref','var','call'])
+        bed_df = bed_df.drop_duplicates()
+        if len(self.read_count_df) != len(bed_df):
+            print(var_bed_file_path)
+            print('Bed file count: ', len(bed_df))
+            print('Counts file count: ', len(self.read_count_df))
+            raise ValueError('Count and bed files return different number of variants')
         return self.read_count_df
 
     def remove_extra_indel_counts(self, chromosome, start, stop):
