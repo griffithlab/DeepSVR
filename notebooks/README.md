@@ -6,7 +6,8 @@ This notebook contains the analysis of the deep learning model.
 
 ### Logistic regression classifier.ipynb
 
-This notebook contains the analysis of the logistic regression model.
+This notebook contains the
+ analysis of the logistic regression model.
 
 ### parse bam read count.ipynb
 
