@@ -1,12 +1,12 @@
-#Notes on papers:
+# Notes on papers:
 	
-####Germline:
+#### Germline:
 1. Machine learning:
    * Deep Variant: Preprint of deep learning approach from Google to call germile variants. The last author of this study was the first author of GATK.
 2. Statistical:
    * GATK: Well regarded germline variant caller from the Broad
 
-####Somatic:
+#### Somatic:
 1. Machine learning:
    * Mutation-seq: Study from BC cancer agency who compare results of random forest, Bayesian 
                 additive regression tree, support vector machine and logistic regression
