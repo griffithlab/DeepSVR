@@ -140,6 +140,11 @@ class ReadCount:
         # This dropping the counts at other positions could eliminate some real signal
         for key in self.bam_readcount_keys:
             self.read_count_dict.pop(key)
+        # Remove duplicated calls
+        bed_df = pd.read_csv(var_bed_file_path, sep='\t', names=['chromosome','start','stop','ref','var','call'])
+        bed_df = bed_df.drop_duplicates()
+        bed_df = self._remove_duplicated_calls(bed_df)
+
         self.read_count_df = pd.DataFrame.from_dict(self.read_count_dict,
                                                     orient='index')
 
@@ -148,10 +153,9 @@ class ReadCount:
         self.read_count_df[sample_prepend_string + '_depth']
         # set VAF to zero when denomitator is zero
         self.read_count_df.loc[self.read_count_df[sample_prepend_string + '_depth'] == 0, sample_prepend_string + '_VAF'] = 0
-        bed_df = pd.read_csv(var_bed_file_path, sep='\t', names=['chromosome','start','stop','ref','var','call'])
-        bed_df = bed_df.drop_duplicates()
+
         if len(self.read_count_df) != len(bed_df):
-            print(var_bed_file_path)
+            print('Bed file path:', var_bed_file_path)
             print('Bed file count: ', len(bed_df))
             print('Counts file count: ', len(self.read_count_df))
             raise ValueError('Count and bed files return different number of variants')
@@ -195,7 +199,28 @@ class ReadCount:
                 # self.read_count_dict[variant_site].pop('bases')
                 self.read_count_dict.setdefault(variant_site, {}).update(dict.fromkeys(keys, 0))
 
+    def _remove_duplicated_calls(self, bed_df):
+        """Removes calls with same coordinates but disagreeing calls
 
+        Parameters:
+            bed_df (pandas.DataFrame): DataFrame of manual review calls
+        Returns:
+            bed_df (pandas.DataFrame): DataFram of manual review calls with 
+                                       duplicates removed
+        """
+
+        duplicated_calls = bed_df[
+            bed_df[['chromosome', 'start', 'stop', 'ref', 'var']].duplicated()]
+        duplicated_call_keys = duplicated_calls.chromosome.map(str) + ':' + \
+                               duplicated_calls.start.map(
+                                   str) + duplicated_calls.ref + '>' + \
+                               duplicated_calls['var']
+        duplicated_call_keys = duplicated_call_keys.values
+        for key in duplicated_call_keys:
+            self.read_count_dict.pop(key, None)
+        return bed_df[
+            ~bed_df[['chromosome', 'start', 'stop', 'ref', 'var']].duplicated(
+                keep=False)]
 
     def _add_zero_depth_readcount_to_dict(self, base_key, bam_readcount_site, variant_site, prepend_string ):
         variant_site_search = re.search('(\w+):(\d+)[\w|-]+>[\w|-]+', variant_site)

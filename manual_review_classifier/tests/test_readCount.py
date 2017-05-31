@@ -5,7 +5,7 @@ from manual_review_classifier.ReadCount import ReadCount
 # import pandas as pd
 import pickle
 
-TEST_DATA_ROOT = 'manual_review_classifier/tests/tst1/'
+TEST_DATA_ROOT = 'tst1/'
 
 class TestReadCount(TestCase):
 
