@@ -1,14 +1,17 @@
 import numpy as np
 import pandas as pd
+from sklearn import metrics
 
 def determine_feature_importance(model, X, Y):
     """Fits model on entire training dataset then shuffles one feature at a 
        time and evaluated the performace of each feature individually.
 
         Returns (pandas.Dataframe) Dataframe of accuracy measures"""
-    model.fit(X, Y, epochs=10, batch_size=5)
 
-    unshuffled_metric = model.evaluate(X, Y, batch_size=5)
+
+    model.fit(X, Y)
+
+    unshuffled_auc = get_roc_auc(model.predict_proba(X), Y)
 
     # dictionary of slice objects to select each feature individually
     features_to_shuffle = {'disease': np.s_[:, 0:8],
@@ -95,21 +98,28 @@ def determine_feature_importance(model, X, Y):
                            'tumor_var_num_minus_strand': np.s_[:, 68],
                            'tumor_var_num_plus_strand': np.s_[:, 69],
                            'tumor_var_num_q2_containing_reads': np.s_[:, 70]}
-    shuffled_metrics = list()
+
+    shuffled_aucs = list()
     for feature in features_to_shuffle:
         shuffled_X = np.copy(X)
         np.random.shuffle(shuffled_X[features_to_shuffle[feature]])
-        shuffled_metric = model.evaluate(shuffled_X, Y, batch_size=5)
-        shuffled_metrics.append([feature] + shuffled_metric)
+        shuffled_auc = get_roc_auc(model.predict_proba(shuffled_X), Y)
+        shuffled_aucs.append([feature, shuffled_auc])
 
-    feature_metrics = pd.DataFrame(shuffled_metrics,
-                                   columns=['feature', 'shuffled_loss',
-                                            'shuffled_accuracy'])
-
-    feature_metrics['delta_loss'] = unshuffled_metric[
-                                        0] - feature_metrics.shuffled_loss
-    feature_metrics['delta_accuracy'] = unshuffled_metric[
-                                            1] - feature_metrics.shuffled_accuracy
-    feature_metrics.sort_values('delta_accuracy', ascending=False,
+    feature_aucs = pd.DataFrame(shuffled_aucs,
+                                   columns=['feature', 'shuffled_auc'])
+    feature_aucs['delta_auc'] = unshuffled_auc - feature_aucs.shuffled_auc
+    feature_aucs.sort_values('delta_auc', ascending=False,
                                 inplace=True)
-    return feature_metrics
+    return feature_aucs
+
+
+def get_roc_auc(probabilities, Y):
+    n_classes = Y.shape[1]
+    fpr = [0] * n_classes
+    tpr = [0] * n_classes
+    roc_auc = [0] * n_classes
+    for i in range(n_classes):
+        fpr[i], tpr[i], _ = metrics.roc_curve(Y[:, i], probabilities[:, i])
+        roc_auc[i] = metrics.auc(fpr[i], tpr[i])
+    return np.mean(roc_auc)
