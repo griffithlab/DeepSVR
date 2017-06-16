@@ -1,6 +1,5 @@
 import re
 import pandas as pd
-import copy
 from manual_review_classifier.utils import to_numeric
 
 BASE_METRICS = ['count', 'avg_mapping_quality', 'avg_basequality',
@@ -73,7 +72,8 @@ class ReadCount:
         with open(var_bed_file_path, 'r') as f:
             for line in f:
                 line = line.strip().split('\t')
-                chromosome, start, stop, reference, variant, call = line
+                chromosome, start, stop, reference, variant, call, reviewer =\
+                    line
                 start = int(start)
                 stop = int(stop)
                 bam_readcount_site = '{0}:{1}'.format(chromosome, start)

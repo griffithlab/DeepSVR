@@ -5,7 +5,7 @@ from manual_review_classifier.ReadCount import ReadCount
 # import pandas as pd
 import pickle
 
-TEST_DATA_ROOT = 'tst1/'
+TEST_DATA_ROOT = 'test_data/'
 
 class TestReadCount(TestCase):
 
@@ -19,11 +19,11 @@ class TestReadCount(TestCase):
         # is intended to insure that parsing does not change unexpectedly.
         #
         # rc = ReadCount(
-        #     '../manual_review_classifier/tests/tst1/tst1_normal.counts')
+        #     '../manual_review_classifier/tests/test_data/tst1_normal.counts')
         # df = rc.compute_variant_metrics(
-        #     '../manual_review_classifier/tests/tst1/tst1_full.bed', 'normal_1')
+        #     '../manual_review_classifier/tests/test_data/tst1_full.bed', 'normal_1')
         # pickle.dump(d, open(
-        #     '../manual_review_classifier/tests/tst1/tst1_normal_valid_dict.pkl',
+        #     '../manual_review_classifier/tests/test_data/tst1_normal_valid_dict.pkl',
         #     'wb'))
 
         valid_dict = pickle.load(open(TEST_DATA_ROOT +
