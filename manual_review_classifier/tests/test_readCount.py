@@ -21,7 +21,7 @@ class TestReadCount(TestCase):
         # rc = ReadCount(
         #     '../manual_review_classifier/tests/test_data/tst1_normal.counts')
         # df = rc.compute_variant_metrics(
-        #     '../manual_review_classifier/tests/test_data/tst1_full.bed', 'normal_1')
+        #     '../manual_review_classifier/tests/test_data/tst1_full.review', 'normal_1')
         # pickle.dump(d, open(
         #     '../manual_review_classifier/tests/test_data/tst1_normal_valid_dict.pkl',
         #     'wb'))
@@ -34,7 +34,7 @@ class TestReadCount(TestCase):
 
     def test_compute_variant_metrics(self):
         data = self.read_count.compute_variant_metrics(TEST_DATA_ROOT +
-                                                       'tst1_full.bed', 'normal_1')
+                                                       'tst1_full.review', 'normal_1')
         self.assertTrue(all(data.columns ==
                             ['normal_1_ref_count',
                              'normal_1_ref_avg_mapping_quality',
