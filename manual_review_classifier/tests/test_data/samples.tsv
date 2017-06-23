@@ -1,0 +1,2 @@
+sample_name	tumor_bam	normal_bam	manual_review	disease	reference_fasta_file_path
+tst1	./test_data/tst1.exome.tumor.bam	./test_data/tst1.exome.normal.bam	./test_data/tst1.review	BRC	~/grch37.fa
