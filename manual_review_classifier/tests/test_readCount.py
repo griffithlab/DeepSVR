@@ -11,30 +11,15 @@ class TestReadCount(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.read_count = ReadCount( TEST_DATA_ROOT + 'tst1_normal.counts')
+        cls.read_count = ReadCount( TEST_DATA_ROOT + 'training_data/readcounts'
+                                                     '/tst1_normal.readcounts')
 
     def test__parse(self):
-
-        # The below code is used to generate the blessed test data. The below
-        # is intended to insure that parsing does not change unexpectedly.
-        #
-        # rc = ReadCount(
-        #     '../manual_review_classifier/tests/test_data/tst1_normal.counts')
-        # df = rc.compute_variant_metrics(
-        #     '../manual_review_classifier/tests/test_data/tst1_full.review', 'normal_1')
-        # pickle.dump(d, open(
-        #     '../manual_review_classifier/tests/test_data/tst1_normal_valid_dict.pkl',
-        #     'wb'))
-
-        valid_dict = pickle.load(open(TEST_DATA_ROOT +
-                                      'tst1_normal_valid_dict.pkl',
-                                      'rb'))
-        test_dict = self.read_count.read_count_dict
-        self.assertEqual(valid_dict, test_dict)
+        self.assertEqual(443, len(self.read_count.read_count_dict))
 
     def test_compute_variant_metrics(self):
         data = self.read_count.compute_variant_metrics(TEST_DATA_ROOT +
-                                                       'tst1_full.review', 'normal_1')
+                                                       'tst1.review', 'normal_1')
         self.assertTrue(all(data.columns ==
                             ['normal_1_ref_count',
                              'normal_1_ref_avg_mapping_quality',
