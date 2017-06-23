@@ -2,9 +2,15 @@ import numpy as np
 import pandas as pd
 from sklearn import metrics
 
-def determine_feature_importance(model, X, Y):
+def determine_feature_importance(model, X, Y, remove_reviewer):
     """Fits model on entire training dataset then shuffles one feature at a 
        time and evaluated the performace of each feature individually.
+
+        Args:
+            model (KerasClassifier): Model to fit
+            X (numpy.array): Features
+            Y (numpy.array): Classes
+            remove_reviewer (bool): True removes reviewer feature
 
         Returns (pandas.Dataframe) Dataframe of accuracy measures"""
 
@@ -98,6 +104,12 @@ def determine_feature_importance(model, X, Y):
                            'tumor_var_num_minus_strand': np.s_[:, 68],
                            'tumor_var_num_plus_strand': np.s_[:, 69],
                            'tumor_var_num_q2_containing_reads': np.s_[:, 70]}
+    if remove_reviewer:
+        features_to_shuffle.pop('reviewer')
+        for feature in features_to_shuffle:
+            if feature is not 'disease':
+                features_to_shuffle[feature] = np.s_[:,features_to_shuffle[
+                                                        feature][1] - 4]
 
     shuffled_aucs = list()
     for feature in features_to_shuffle:
