@@ -2,6 +2,8 @@
 # Author: javier http://stackoverflow.com/users/11649/javier
 # Source: http://stackoverflow.com/a/379966
 # License: MIT
+
+
 def to_numeric(s):
     """Convert string to int or float
 
