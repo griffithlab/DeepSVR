@@ -15,5 +15,5 @@ setup(
         'License :: OSI Approved :: MIT License'
         'Programming Language :: Python :: 3.6'
     ],
-    packages=['manual_review_classifier']
+    packages=['manual_review_classifier'], requires=['pandas']
 )

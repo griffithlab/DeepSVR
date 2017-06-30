@@ -49,13 +49,14 @@ def create_reliability_diagram(probability_array, Y, columns, highlight_color):
 
     pct_positive = positive_counts / (positive_counts + negative_counts)
 
-    #calculate confidence interval see https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval
+    # calculate confidence interval
+    # see https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval
     alpha = 0.05
     z = 1 - ((1/2) * alpha)
     pct_negative = 1 - pct_positive
     inverse_n = 1/(positive_counts+negative_counts)
     con_ints = z * np.sqrt(inverse_n * pct_positive * pct_negative)
-    print('confidence intervals +-: ',con_ints)
+    print('confidence intervals +-: ', con_ints)
 
     width = 0.04  # the width of the bars
 
@@ -75,12 +76,14 @@ def create_reliability_diagram(probability_array, Y, columns, highlight_color):
     ax2 = ax1.twinx()
     ax2.plot([0, 1], [0, 1], 'k--', color='grey')
     r2 = metrics.r2_score(positive_means, pct_positive)
-    (_, caps, _) = ax2.errorbar(positive_means, pct_positive, yerr=con_ints, fmt="-o", color=highlight_color, markersize=8, capsize=8)
+    (_, caps, _) = ax2.errorbar(positive_means, pct_positive, yerr=con_ints,
+                                fmt="-o", color=highlight_color, markersize=8,
+                                capsize=8)
     for cap in caps:
         cap.set_markeredgewidth(1)
     ax2.text(.6, .85, '$R^2$: {0:0.2f}'.format(r2), color=highlight_color,
              fontsize=15)
     ax2.tick_params(axis='y', colors=highlight_color)
-    ax2.set_ylabel("Percent positive", color=highlight_color)
+    ax2.set_ylabel("Percent positive")
 
     plt.show()
