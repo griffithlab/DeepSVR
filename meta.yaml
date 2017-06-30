@@ -1,0 +1,43 @@
+package:
+  name: manual_review_classifier
+  version: "0.0.1"
+
+source:
+  path: .
+
+build:
+  script:
+    - flake8 . -v --config=.flake8rc
+    - nosetests --verbose
+    - python setup.py install
+#  entry_points:
+#    - convert_zero_one_based = zero_one_based_conversion.cli:main
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - nose
+    - flake8
+    - pandas
+    - numpy
+    - scikit-learn
+    - matplotlib
+    - seaborn
+    - bam-readcount
+    - convert_zero_one_based
+#    - click
+  run:
+    - python
+    - bam-readcount
+
+test:
+  requires:
+    - nose
+  imports:
+    - manual_review_classifier
+
+
+about:
+  home: https://github.com/bainscou/manual_review_classifier
+  license: MIT
