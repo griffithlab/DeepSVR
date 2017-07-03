@@ -82,7 +82,8 @@ class ReadCount:
                     (chromosome, start, stop,
                      reference, variant, call, reviewer) = line
                 else:
-                    chromosome, start, stop, reference, variant, call, _ = line
+                    line = line[:6]
+                    chromosome, start, stop, reference, variant, call = line
                 start = int(start)
                 stop = int(stop)
                 bam_readcount_site = '{0}:{1}'.format(chromosome, start)
