@@ -67,7 +67,6 @@ class PrepareData:
         self.review = pd.DataFrame(columns=['chromosome', 'start', 'stop',
                                             'ref', 'var', 'call', 'reviewer'])
         for sample in self.samples:
-            print(os.getcwd())
             sites_file_path = os.path.join(out_dir_path, sample[0] + '.sites')
             review = self._parse_review_file(sample[3], sites_file_path,
                                              sample[0])
@@ -165,7 +164,6 @@ class PrepareData:
         x_scaled = min_max_scaler.fit_transform(x)
         scaled = pd.DataFrame(x_scaled, index=self.training_data.index,
                               columns=columns)
-        print(self.categorical_columns)
         self.training_data = pd.concat(
             [self.training_data[self.categorical_columns], scaled], axis=1)
         self.training_data.to_pickle(
