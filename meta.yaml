@@ -10,8 +10,8 @@ build:
     - flake8 . -v --config=.flake8rc
     - nosetests --verbose
     - python setup.py install
-#  entry_points:
-#    - convert_zero_one_based = zero_one_based_conversion.cli:main
+  entry_points:
+    - prepare_manual_review_classifier_data = manual_review_classifier.cli:main
 
 requirements:
   build:
@@ -26,7 +26,7 @@ requirements:
     - seaborn
     - bam-readcount
     - convert_zero_one_based
-#    - click
+    - click
   run:
     - python
     - bam-readcount
