@@ -7,8 +7,8 @@ from manual_review_classifier.PrepareData import PrepareData
 def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
-    version = pkg_resources\
-        .get_distribution('manual_review_classifier').version
+    version = pkg_resources.\
+        get_distribution('manual_review_classifier').version
     click.echo(version)
     ctx.exit()
 
@@ -34,7 +34,7 @@ def main(header, sample_file_path,  output_dir_path):
     Prepare data for training or classification in manual review model.
     """
 
-    data = PrepareData(sample_file_path, header, output_dir_path)
+    PrepareData(sample_file_path, header, output_dir_path)
 
 
 if __name__ == '__main__':
