@@ -1,9 +1,9 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 setup(
     name='manual_review_classifier',
     version='0.0.1',
-    description='MR processing',
+    description='Manual review processing',
     url='https://github.com/bainscou/manual_review_classifier',
     author='Ben Ainscough',
     author_email='b.ainscough@wustl.edu',
@@ -15,5 +15,5 @@ setup(
         'License :: OSI Approved :: MIT License'
         'Programming Language :: Python :: 3.6'
     ],
-    packages=['manual_review_classifier'], requires=['pandas', 'click']
+    packages=find_packages()
 )
