@@ -31,7 +31,8 @@ def _calculate_hist(probabilities,
     return np.array(counts), np.array(means)
 
 
-def create_reliability_diagram(probability_array, Y, columns, highlight_color):
+def create_reliability_diagram(probability_array, Y, columns, highlight_color,
+                               title):
     bins = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1]
     prob_df = pd.DataFrame(probability_array, columns=columns)
 
@@ -68,10 +69,11 @@ def create_reliability_diagram(probability_array, Y, columns, highlight_color):
 
     # add some text for labels, title and axes ticks
 
-    ax1.set_title('Reliability diagram')
+    ax1.set_title(title)
     ax1.set_ylabel('Count')
-    ax1.legend((rects1[0], rects2[0]), ('Negative', 'Positive'),
-               loc='center left', bbox_to_anchor=(1.05, .05))
+    ax1.legend((rects1[0], rects2[0]), ('Prediction disagrees with call',
+                                        'Prediction agrees with call'),
+               loc='upper left', bbox_to_anchor=(.1, 1))
 
     ax2 = ax1.twinx()
     ax2.plot([0, 1], [0, 1], 'k--', color='grey')
@@ -84,6 +86,6 @@ def create_reliability_diagram(probability_array, Y, columns, highlight_color):
     ax2.text(.6, .85, '$R^2$: {0:0.2f}'.format(r2), color=highlight_color,
              fontsize=15)
     ax2.tick_params(axis='y', colors=highlight_color)
-    ax2.set_ylabel("Percent positive")
+    ax2.set_ylabel("Percent call agreement")
 
     plt.show()
