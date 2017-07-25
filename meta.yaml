@@ -30,6 +30,7 @@ requirements:
   run:
     - python
     - bam-readcount
+    - scikit-learn
 
 test:
   requires:
