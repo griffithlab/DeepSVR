@@ -5,6 +5,7 @@ from sklearn import metrics
 
 import matplotlib.pyplot as plt
 import seaborn as sns
+from itertools import cycle
 
 sns.set_style('white')
 
@@ -88,4 +89,33 @@ def create_reliability_diagram(probability_array, Y, columns, highlight_color,
     ax2.tick_params(axis='y', colors=highlight_color)
     ax2.set_ylabel("Percent call agreement")
 
+    plt.show()
+
+def create_roc_curve(Y, probabilities, class_lookup, title):
+    '''Create ROC curve to compare multiclass model performance.
+
+    Parameters:
+        Y (numpy.array): Truth labels
+        probabilities (numpy.array): Output of model for each class
+        class_lookup (dict): lookup hash of truth labels
+        title (str): Plot title
+    '''
+    n_classes = Y.shape[1]
+    fpr = dict()
+    tpr = dict()
+    roc_auc = dict()
+    plt.title(title)
+    colors = cycle(['purple', 'aqua', 'red'])
+    for i, color in zip(range(n_classes), colors):
+        fpr[i], tpr[i], _ = metrics.roc_curve(Y[:, i], probabilities[:, i])
+        roc_auc[i] = metrics.auc(fpr[i], tpr[i])
+        plt.plot(fpr[i], tpr[i], color=color, label='ROC curve of class {0}'
+                                                    ' (area = {1:0.2f})'.format(
+            class_lookup[i], roc_auc[i]))
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.xlim([-0.01, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.legend(loc="lower right")
     plt.show()
