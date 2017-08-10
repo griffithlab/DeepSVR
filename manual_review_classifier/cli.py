@@ -23,8 +23,14 @@ def print_version(ctx, param, value):
 @click.option('--sample-file-path', '-sfp',
               help='File path of tsv file with sample information. File should'
                    'have the following columns in order: sample_name, '
-                   'tumor_bam, normal_bam, manual_review, disease, '
-                   'reference_fasta_file_path')
+                   'tumor_bam_path, normal_bam_path, manual_review_file_path'
+                   ', reviewer, disease, reference_genome_fasta_file_path.'
+                   'If the reviewer is specified in the manual review file or '
+                   'not available for the dataset leave the column blank.'
+                   'The manual review file should have the following columns'
+                   'in order: chromosome, start, stop, reference, variant,'
+                   'call, tag, notes, reviewer. For the manual review file'
+                   'the reviewer column is optional.')
 @click.option('--output-dir-path', '-odp', default='~/training_data',
               help='Specify output directory: Readcount files and compressed '
                    'pandas dataframe will be output here '
