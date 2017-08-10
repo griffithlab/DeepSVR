@@ -74,13 +74,18 @@ class ReadCount:
         if len(self.read_count_df) > 0:
             return self.read_count_df
         with open(var_bed_file_path, 'r') as f:
+            bed_file_header = False
             for line in f:
                 line = line.strip().split('\t')
+                # if review file has header, skip to the next line.
+                if line[0].lower() == 'chromosome':
+                    bed_file_header = True
+                    continue
                 if len(line) == 1:
                     print(line)
                 if bed_contains_reviewer:
-                    (chromosome, start, stop,
-                     reference, variant, call, reviewer) = line
+                    (chromosome, start, stop, reference, variant, call, _, _,
+                     reviewer) = line
                 else:
                     line = line[:6]
                     chromosome, start, stop, reference, variant, call = line
@@ -172,13 +177,6 @@ class ReadCount:
         # positions could eliminate some real signal
         for key in self.bam_readcount_keys:
             self.read_count_dict.pop(key)
-        # Remove duplicated calls
-        bed_df = pd.read_csv(var_bed_file_path, sep='\t',
-                             names=['chromosome', 'start', 'stop', 'ref',
-                                    'var', 'call'])
-        bed_df = bed_df.drop_duplicates()
-        bed_df = self._remove_duplicated_calls(bed_df)
-
         self.read_count_df = pd.DataFrame.from_dict(self.read_count_dict,
                                                     orient='index')
 
@@ -190,13 +188,38 @@ class ReadCount:
                                    sample_prepend_string + '_depth'] == 0,
                                sample_prepend_string + '_VAF'] = 0
 
+        self.validate_bam_readcount_output(bed_file_header, var_bed_file_path)
+        return self.read_count_df
+
+    def validate_bam_readcount_output(self, bed_file_header,
+                                      var_bed_file_path):
+        """Determine if provided bed file and bam-readcount output return the
+        same number of variants
+
+            Args:
+                bed_file_header (bool): Specify if bed file has header
+                var_bed_file_path (str): File path of bed file
+        """
+        # Remove duplicated calls from bed files an check that the correct
+        # number of variants were counted by bam-readcount
+        if bed_file_header:
+            bed_df = pd.read_csv(var_bed_file_path, sep='\t')
+            bed_df.columns = map(str.lower, bed_df.columns)
+            bed_df.rename(columns={'reference': 'ref', 'variant': 'var'},
+                          inplace=True)
+        else:
+            bed_df = pd.read_csv(var_bed_file_path, sep='\t',
+                                 names=['chromosome', 'start', 'stop', 'ref',
+                                        'var', 'call'])
+        bed_df = bed_df[['chromosome', 'start', 'stop', 'ref', 'var', 'call']]
+        bed_df = bed_df.drop_duplicates()
+        bed_df = self._remove_duplicated_calls(bed_df)
         if len(self.read_count_df) != len(bed_df):
             print('Bed file path:', var_bed_file_path)
             print('Bed file count: ', len(bed_df))
             print('Counts file count: ', len(self.read_count_df))
             raise ValueError(
                 'Count and bed files return different number of variants')
-        return self.read_count_df
 
     def remove_extra_indel_counts(self, chromosome, start, stop):
         for i in range(start + 1, stop + 1):

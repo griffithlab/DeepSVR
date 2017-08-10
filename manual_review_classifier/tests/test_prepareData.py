@@ -27,6 +27,12 @@ class TestPrepareData(TestCase):
                                          True,
                                          os.path.join(TEST_DATA_BASE_DIR,
                                                       'training_data'))
+        cls.no_reviewer = PrepareData(os.path.join(TEST_DATA_BASE_DIR,
+                                                   'samples_no_reviewer.tsv'),
+                                      True,
+                                      os.path.join(TEST_DATA_BASE_DIR,
+                                                   'training_data',
+                                                   'no_reviewer'))
 
     def test__parse_samples_file(self):
         self.assertTrue(len(self.samples_header.samples) == 1)
@@ -45,3 +51,5 @@ class TestPrepareData(TestCase):
         self.assertEqual(len(self.samples_noheader.training_data.columns), 60)
         self.assertEqual(
             round(self.samples_noheader.training_data.values.max(), 3), 1)
+        self.assertEqual(len(self.no_reviewer.training_data), 443)
+        self.assertEqual(len(self.no_reviewer.training_data.columns), 59)
