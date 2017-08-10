@@ -67,50 +67,64 @@ class PrepareData:
         self.review = pd.DataFrame(columns=['chromosome', 'start', 'stop',
                                             'ref', 'var', 'call', 'reviewer'])
         for sample in self.samples:
+            reviewer_specified = sample[4] != ''
             sites_file_path = os.path.join(out_dir_path, sample[0] + '.sites')
             review = self._parse_review_file(sample[3], sites_file_path,
                                              sample[0])
-            review['disease'] = sample[4]
+            review['disease'] = sample[5]
+            if reviewer_specified:
+                review['reviewer'] = sample[4]
+            else:
+                reviewer_specified = 'reviewer' in review.columns
             self.review = pd.concat([self.review, review], ignore_index=True)
             tumor_readcount_file_path = '{0}/{1}_tumor' \
                                         '.readcounts'.format(out_dir_path,
                                                              sample[0])
             os.system('bam-readcount -i -w 0 -l '
-                      '{0} -f {1} {2} > {3}'.format(sites_file_path, sample[5],
+                      '{0} -f {1} {2} > {3}'.format(sites_file_path, sample[6],
                                                     sample[1],
                                                     tumor_readcount_file_path))
             normal_readcount_file_path = '{0}/{1}_normal' \
                                          '.readcounts'.format(out_dir_path,
                                                               sample[0])
             os.system('bam-readcount -i -w 0 -l '
-                      '{0} -f {1} {2} > {3}'.format(sites_file_path, sample[5],
+                      '{0} -f {1} {2} > {3}'.format(sites_file_path, sample[6],
                                                     sample[2],
                                                     normal_readcount_file_path)
                       )
 
             tumor_rc = ReadCount(tumor_readcount_file_path)
             tumor_data = tumor_rc.compute_variant_metrics(sample[3], 'tumor',
-                                                          True, sample[4])
+                                                          reviewer_specified,
+                                                          sample[5])
             normal_rc = ReadCount(normal_readcount_file_path)
             normal_data = normal_rc.compute_variant_metrics(sample[3],
-                                                            'normal', True,
-                                                            sample[4])
+                                                            'normal',
+                                                            reviewer_specified,
+                                                            sample[5])
             if len(tumor_data) != len(normal_data):
                 raise ValueError(
                     'Dataframes cannot be merged. They are differing lengths.')
-            individual_df = pd.merge(tumor_data, normal_data,
-                                     on=['chromosome', 'start', 'stop', 'ref',
-                                         'var', 'call', 'disease', 'reviewer'])
+            if reviewer_specified:
+                individual_df = pd.merge(tumor_data, normal_data,
+                                         on=['chromosome', 'start', 'stop',
+                                             'ref', 'var', 'call', 'disease',
+                                             'reviewer'])
+            else:
+                individual_df = pd.merge(tumor_data, normal_data,
+                                         on=['chromosome', 'start', 'stop',
+                                             'ref', 'var', 'call', 'disease'])
             self.training_data = pd.concat([self.training_data, individual_df],
                                            ignore_index=True)
 
         self.training_data.drop(['chromosome', 'start', 'stop', 'ref', 'var'],
                                 axis=1, inplace=True)
         self._perform_one_hot_encoding('disease')
-        self._perform_one_hot_encoding('reviewer')
+        if reviewer_specified:
+            self._perform_one_hot_encoding('reviewer')
         self.calls = self.training_data.pop('call')
 
-        # normalize contunous variables
+        # normalize continuous variables
         columns = ['normal_VAF', 'normal_depth', 'normal_other_bases_count',
                    'normal_ref_avg_basequality',
                    'normal_ref_avg_clipped_length',
@@ -186,9 +200,17 @@ class PrepareData:
 
     def _parse_review_file(self, manual_review_file_path, sites_file_path,
                            sample_name):
-        manual_review = pd.read_csv(manual_review_file_path, sep='\t',
-                                    names=['chromosome', 'start', 'stop',
-                                           'ref', 'var', 'call', 'reviewer'])
+        manual_review = pd.read_csv(manual_review_file_path, sep='\t')
+        manual_review.columns = map(str.lower, manual_review.columns)
+        manual_review.rename(columns={'reference': 'ref', 'variant': 'var'},
+                             inplace=True)
+        if 'reviewer' in manual_review.columns:
+            manual_review = manual_review[['chromosome', 'start', 'stop',
+                                           'ref', 'var', 'call',
+                                           'reviewer']]
+        else:
+            manual_review = manual_review[['chromosome', 'start', 'stop',
+                                           'ref', 'var', 'call']]
         manual_review = manual_review.apply(self._convert_one_based, axis=1)
         manual_review = manual_review.replace('', np.nan).dropna(how='all')
         manual_review[['chromosome', 'start', 'stop']].to_csv(sites_file_path,
