@@ -16,23 +16,35 @@ def file_len(fname):
 class TestPrepareData(TestCase):
     @classmethod
     def setUpClass(cls):
+        # Test processing sample file w/o header
         cls.samples_noheader = PrepareData(os.path.join(TEST_DATA_BASE_DIR,
                                                         'samples.noheader.tsv'
                                                         ),
                                            False,
                                            os.path.join(TEST_DATA_BASE_DIR,
                                                         'training_data'))
+        # process sample file with header
         cls.samples_header = PrepareData(os.path.join(TEST_DATA_BASE_DIR,
                                                       'samples.tsv'),
                                          True,
                                          os.path.join(TEST_DATA_BASE_DIR,
                                                       'training_data'))
+        # Test when no reviewer is specified
         cls.no_reviewer = PrepareData(os.path.join(TEST_DATA_BASE_DIR,
                                                    'samples_no_reviewer.tsv'),
                                       True,
                                       os.path.join(TEST_DATA_BASE_DIR,
                                                    'training_data',
                                                    'no_reviewer'))
+        # Test overiding the reviewer when specified in the sample file but not
+        # in the review file
+        cls.sample_reviewer = PrepareData(os.path.join
+                                      (TEST_DATA_BASE_DIR,
+                                       'samples_with_reviewer.tsv'),
+                                      True,
+                                      os.path.join(TEST_DATA_BASE_DIR,
+                                                   'training_data',
+                                                   'reviewer_in_sample'))
 
     def test__parse_samples_file(self):
         self.assertTrue(len(self.samples_header.samples) == 1)
@@ -53,3 +65,5 @@ class TestPrepareData(TestCase):
             round(self.samples_noheader.training_data.values.max(), 3), 1)
         self.assertEqual(len(self.no_reviewer.training_data), 443)
         self.assertEqual(len(self.no_reviewer.training_data.columns), 59)
+        self.assertEqual(len(self.sample_reviewer.training_data), 443)
+        self.assertEqual(len(self.sample_reviewer.training_data.columns), 60)
