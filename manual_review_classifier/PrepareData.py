@@ -67,6 +67,7 @@ class PrepareData:
         self.review = pd.DataFrame(columns=['chromosome', 'start', 'stop',
                                             'ref', 'var', 'call', 'reviewer'])
         for sample in self.samples:
+            print('Starting on sample {0}\n'.format(sample[0]))
             reviewer_specified = sample[4] != ''
             sites_file_path = os.path.join(out_dir_path, sample[0] + '.sites')
             review = self._parse_review_file(sample[3], sites_file_path,
@@ -77,6 +78,7 @@ class PrepareData:
             else:
                 reviewer_specified = 'reviewer' in review.columns
             self.review = pd.concat([self.review, review], ignore_index=True)
+            print('Processing tumor bam file:\n\t{0}'.format(sample[1]))
             tumor_readcount_file_path = '{0}/{1}_tumor' \
                                         '.readcounts'.format(out_dir_path,
                                                              sample[0])
@@ -84,6 +86,12 @@ class PrepareData:
                       '{0} -f {1} {2} > {3}'.format(sites_file_path, sample[6],
                                                     sample[1],
                                                     tumor_readcount_file_path))
+
+            tumor_rc = ReadCount(tumor_readcount_file_path)
+            tumor_data = tumor_rc.compute_variant_metrics(sample[3], 'tumor',
+                                                          reviewer_specified,
+                                                          sample[5])
+            print('Processing normal bam file:\n\t{0}'.format(sample[2]))
             normal_readcount_file_path = '{0}/{1}_normal' \
                                          '.readcounts'.format(out_dir_path,
                                                               sample[0])
@@ -92,11 +100,6 @@ class PrepareData:
                                                     sample[2],
                                                     normal_readcount_file_path)
                       )
-
-            tumor_rc = ReadCount(tumor_readcount_file_path)
-            tumor_data = tumor_rc.compute_variant_metrics(sample[3], 'tumor',
-                                                          reviewer_specified,
-                                                          sample[5])
             normal_rc = ReadCount(normal_readcount_file_path)
             normal_data = normal_rc.compute_variant_metrics(sample[3],
                                                             'normal',
