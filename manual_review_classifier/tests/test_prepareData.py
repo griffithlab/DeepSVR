@@ -39,12 +39,12 @@ class TestPrepareData(TestCase):
         # Test overiding the reviewer when specified in the sample file but not
         # in the review file
         cls.sample_reviewer = PrepareData(os.path.join
-                                      (TEST_DATA_BASE_DIR,
-                                       'samples_with_reviewer.tsv'),
-                                      True,
-                                      os.path.join(TEST_DATA_BASE_DIR,
-                                                   'training_data',
-                                                   'reviewer_in_sample'))
+                                          (TEST_DATA_BASE_DIR,
+                                           'samples_with_reviewer.tsv'),
+                                          True,
+                                          os.path.join(TEST_DATA_BASE_DIR,
+                                                       'training_data',
+                                                       'reviewer_in_sample'))
 
     def test__parse_samples_file(self):
         self.assertTrue(len(self.samples_header.samples) == 1)
