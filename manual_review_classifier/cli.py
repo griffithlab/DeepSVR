@@ -30,7 +30,8 @@ def print_version(ctx, param, value):
                    'The manual review file should have the following columns'
                    'in order: chromosome, start, stop, reference, variant,'
                    'call, tag, notes, reviewer. For the manual review file'
-                   'the reviewer column is optional.')
+                   'the reviewer column is optional. Labels need to match'
+                   'above.')
 @click.option('--output-dir-path', '-odp', default='~/training_data',
               help='Specify output directory: Readcount files and compressed '
                    'pandas dataframe will be output here '
