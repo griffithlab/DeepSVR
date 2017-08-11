@@ -67,7 +67,7 @@ class PrepareData:
         self.review = pd.DataFrame(columns=['chromosome', 'start', 'stop',
                                             'ref', 'var', 'call', 'reviewer'])
         for sample in self.samples:
-            print('-----------------------------------------------'
+            print('-----------------------------------------------------'
                   '\nStarting on sample {0}\n'.format(sample[0]))
             reviewer_specified_in_sample = sample[4] != ''
             sites_file_path = os.path.join(out_dir_path, sample[0] + '.sites')
