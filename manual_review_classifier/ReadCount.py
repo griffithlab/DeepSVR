@@ -284,9 +284,8 @@ class ReadCount:
         duplicated_call_keys = duplicated_call_keys.values
         for key in duplicated_call_keys:
             self.read_count_dict.pop(key, None)
-        return bed_df[
-            ~bed_df[['chromosome', 'start', 'stop', 'ref', 'var']].duplicated(
-                keep=False)]
+        return bed_df.loc[bed_df[['chromosome', 'start', 'stop',
+                                  'ref', 'var']].drop_duplicates().index]
 
     def _add_zero_depth_readcount_to_dict(self, base_key, bam_readcount_site,
                                           variant_site, prepend_string):
