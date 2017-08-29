@@ -91,6 +91,7 @@ def create_reliability_diagram(probability_array, Y, columns, highlight_color,
 
     plt.show()
 
+
 def create_roc_curve(Y, probabilities, class_lookup, title):
     '''Create ROC curve to compare multiclass model performance.
 
@@ -105,13 +106,17 @@ def create_roc_curve(Y, probabilities, class_lookup, title):
     tpr = dict()
     roc_auc = dict()
     plt.title(title)
-    colors = cycle(['purple', 'aqua', 'red'])
+    if n_classes == 3:
+        colors = cycle(['orange', 'red', 'black'])
+    else:
+        colors = cycle(['orange', 'red', 'aqua', 'black'])
     for i, color in zip(range(n_classes), colors):
         fpr[i], tpr[i], _ = metrics.roc_curve(Y[:, i], probabilities[:, i])
         roc_auc[i] = metrics.auc(fpr[i], tpr[i])
-        plt.plot(fpr[i], tpr[i], color=color, label='ROC curve of class {0}'
-                                                    ' (area = {1:0.2f})'.format(
-            class_lookup[i], roc_auc[i]))
+        plt.plot(fpr[i], tpr[i], color=color, label='ROC curve of class '
+                                                    '{0} (area = {1:0.2f}'
+                                                    ')'.format(class_lookup[i],
+                                                               roc_auc[i]))
     plt.plot([0, 1], [0, 1], 'k--')
     plt.xlim([-0.01, 1.0])
     plt.ylim([0.0, 1.05])
@@ -119,3 +124,28 @@ def create_roc_curve(Y, probabilities, class_lookup, title):
     plt.ylabel('True Positive Rate')
     plt.legend(loc="lower right")
     plt.show()
+
+
+def create_feature_importance_plot(feature_importance_metrics, title):
+    '''Create bar plot illustrating importance of each feature.
+
+    Parameters:
+        feature_importance_metrics (pandas.DataFrame): DataFrame with features
+                                                       on index and a column
+                                                       named delta_auc
+                                                       containing the change
+                                                       in roc auc values
+        title (str): Title of plot
+    '''
+    feature_importance_metrics.replace(
+        {'feature': {'var': 'variant', 'ref': 'reference',
+                     'avg': 'average',
+                     '_se_': '_single_end_',
+                     '3p': '3_prime', '_': ' '}},
+        regex=True, inplace=True)
+    sns.barplot(y='feature', x='delta_auc',
+                data=feature_importance_metrics.head(30),
+                color='cornflowerblue')
+    plt.xlabel('Delta average AUC')
+    plt.ylabel('Feature')
+    plt.title(title)
