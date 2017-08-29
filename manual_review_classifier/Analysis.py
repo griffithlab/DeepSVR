@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn import metrics
+from sklearn import preprocessing
 
 
 def determine_feature_importance(model, X, Y, remove_reviewer):
@@ -118,6 +119,9 @@ def determine_feature_importance(model, X, Y, remove_reviewer):
 
 
 def get_roc_auc(probabilities, Y):
+    # for binary classifier add labels for fail category
+    if len(Y.shape) == 1:
+        Y = np.array([np.logical_not(Y), Y]).T
     n_classes = Y.shape[1]
     fpr = [0] * n_classes
     tpr = [0] * n_classes
@@ -126,3 +130,32 @@ def get_roc_auc(probabilities, Y):
         fpr[i], tpr[i], _ = metrics.roc_curve(Y[:, i], probabilities[:, i])
         roc_auc[i] = metrics.auc(fpr[i], tpr[i])
     return np.mean(roc_auc)
+
+
+def print_accuracy_and_classification_report(labels, prediction):
+    """Print model accuracy and classification report.
+
+    Args:
+        labels (numpy.array): Truth lables
+        prediction (numpy.array): Model predictions
+    """
+    print('Cross validation accuracy:')
+    print('\t', metrics.accuracy_score(labels, prediction))
+    print('\nCross validation classification report\n')
+    print(metrics.classification_report(labels, prediction))
+
+
+def predict_classes(probabilities):
+    """Predict class labels from probabilities
+
+    Args:
+        probabilities (numpy.array): model output for each class
+    Returns:
+        (numpy.array): Model predicted class labels
+    """
+    predicted = np.array(
+        [list(a).index(max(list(a))) for a in list(probabilities)])
+    label_binarizer = preprocessing.LabelBinarizer()
+
+    label_binarizer.fit(range(max(predicted) + 1))
+    return label_binarizer.transform(predicted)
