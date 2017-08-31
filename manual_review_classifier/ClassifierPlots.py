@@ -25,10 +25,17 @@ def _calculate_hist(probabilities,
     counts = list()
     means = list()
     for i in range(0, len(bins) - 1):
-        counts.append(len(probabilities[(probabilities > bins[i])
-                                        & (probabilities <= bins[i + 1])]))
-        means.append(np.mean(probabilities[(probabilities > bins[i])
-                                           & (probabilities <= bins[i + 1])]))
+        count = len(probabilities[(probabilities > bins[i])
+                                  & (probabilities <= bins[i + 1])])
+        if count == 0:
+            counts.append(0)
+            bin_mean = np.mean([bins[i], bins[i+1]])
+            means.append(bin_mean)
+        else:
+            counts.append(count)
+            means.append(np.mean(probabilities[(probabilities > bins[i]) &
+                                               (probabilities <= bins[i + 1])])
+                         )
     return np.array(counts), np.array(means)
 
 
@@ -50,6 +57,8 @@ def create_reliability_diagram(probability_array, Y, columns, highlight_color,
                                                       bins)
 
     pct_positive = positive_counts / (positive_counts + negative_counts)
+
+    pct_positive = np.nan_to_num(pct_positive)
 
     # calculate confidence interval
     # see https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval
