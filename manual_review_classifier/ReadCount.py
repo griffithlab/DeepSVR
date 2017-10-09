@@ -84,7 +84,7 @@ class ReadCount:
                 if len(line) == 1:
                     print(line)
                 if bed_contains_reviewer:
-                    (chromosome, start, stop, reference, variant, call, _, _,
+                    (chromosome, start, stop, reference, variant, call,
                      reviewer) = line
                 else:
                     line = line[:6]
