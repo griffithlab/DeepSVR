@@ -18,12 +18,13 @@ class TestReadCount(TestCase):
 
     def test_compute_variant_metrics(self):
         data = self.read_count.compute_variant_metrics(TEST_DATA_ROOT +
-                                                       'tst1.review',
+                                                       'tst1.review.one_based',
                                                        'normal_1', False,
                                                        'BRC')
         self.assertEqual(36, len(data.columns))
         t_data = self.t_read_count.compute_variant_metrics(TEST_DATA_ROOT +
-                                                           'tst1.review',
+                                                           'tst1.review.'
+                                                           'one_based',
                                                            'tumor', True,
                                                            'BRC')
         self.assertEqual(37, len(t_data.columns))
