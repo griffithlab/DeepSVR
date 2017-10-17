@@ -15,7 +15,8 @@ class PrepareData:
 
     """
 
-    def __init__(self, samples_file_path, header, out_dir_path, skip_readcount):
+    def __init__(self, samples_file_path, header, out_dir_path,
+                 skip_readcount):
         """Assemble pandas.Dataframe of data
 
             Args:
@@ -131,8 +132,12 @@ class PrepareData:
                 individual_df = pd.merge(tumor_data, normal_data,
                                          on=['chromosome', 'start', 'stop',
                                              'ref', 'var', 'call', 'disease'])
-            self.training_data = pd.concat([self.training_data, individual_df],
-                                           ignore_index=True)
+            individual_df.index = (sample[0] + '~' + individual_df.chromosome +
+                                   ':' + individual_df.start.map(str) + '-' +
+                                   individual_df.stop.map(str) +
+                                   individual_df.ref + '>' +
+                                   individual_df['var'])
+            self.training_data = pd.concat([self.training_data, individual_df])
 
         self.training_data.drop(['chromosome', 'start', 'stop', 'ref', 'var'],
                                 axis=1, inplace=True)
