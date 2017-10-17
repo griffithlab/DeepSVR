@@ -20,6 +20,10 @@ def print_version(ctx, param, value):
 @click.option('--header/--no-header',
               default=False,
               help='Specify whether header is present in sample file')
+@click.option('--skip_bam_readcount/--no-skip_bam_readcount',
+              default=False,
+              help='If bam readcount files already exist in output directory, '
+                   'skip the bam-readcount step')
 @click.option('--sample-file-path', '-sfp',
               help='File path of tsv file with sample information. File should'
                    'have the following columns in order: sample_name, '
@@ -36,12 +40,12 @@ def print_version(ctx, param, value):
               help='Specify output directory: Readcount files and compressed '
                    'pandas dataframe will be output here '
                    '(default:~/training_data)')
-def main(header, sample_file_path,  output_dir_path):
+def main(header, skip_bam_readcount, sample_file_path,  output_dir_path):
     """
     Prepare data for training or classification in manual review model.
     """
 
-    PrepareData(sample_file_path, header, output_dir_path)
+    PrepareData(sample_file_path, header, output_dir_path, skip_bam_readcount)
 
 
 if __name__ == '__main__':
