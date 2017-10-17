@@ -2,8 +2,10 @@ import numpy as np
 import pandas as pd
 
 from sklearn import metrics
+from scipy.stats import pearsonr
 
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import seaborn as sns
 from itertools import cycle
 
@@ -40,7 +42,7 @@ def _calculate_hist(probabilities,
 
 
 def create_reliability_diagram(probability_array, Y, columns, highlight_color,
-                               title):
+                               title, ax1, y2_label, y_label, legend):
     bins = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1]
     prob_df = pd.DataFrame(probability_array, columns=columns)
 
@@ -71,7 +73,7 @@ def create_reliability_diagram(probability_array, Y, columns, highlight_color,
 
     width = 0.04  # the width of the bars
 
-    fig, ax1 = plt.subplots()
+    # fig, ax1 = plt.subplots()
     rects1 = ax1.bar(positive_means - width / 2, negative_counts, width,
                      color='black', edgecolor='black')
     rects2 = ax1.bar(positive_means + width / 2, positive_counts, width,
@@ -79,29 +81,41 @@ def create_reliability_diagram(probability_array, Y, columns, highlight_color,
 
     # add some text for labels, title and axes ticks
 
-    ax1.set_title(title)
-    ax1.set_ylabel('Count')
-    ax1.legend((rects1[0], rects2[0]), ('Prediction disagrees with call',
-                                        'Prediction agrees with call'),
-               loc='upper left', bbox_to_anchor=(.1, 1))
+    ax1.set_title(title, fontsize=8)
+    if y_label:
+        ax1.set_ylabel('Count (1000s)', fontsize=8)
+    ax1.set_xlabel('Model output', fontsize=8)
+    ticks_y = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x / 1000))
+    ax1.yaxis.set_major_formatter(ticks_y)
+    ax1.tick_params(labelsize=8, pad=1.5)
+    ax1.yaxis.labelpad = 1
+    ax1.xaxis.labelpad = 1
 
     ax2 = ax1.twinx()
-    ax2.plot([0, 1], [0, 1], 'k--', color='grey')
-    r2 = metrics.r2_score(positive_means, pct_positive)
+    ax2.tick_params(labelsize=8, pad=1.5)
+    ax2.plot([0, 1], [0, 1], 'k--', color='grey', linewidth=1)
+    r = pearsonr(positive_means, pct_positive)[0]
     (_, caps, _) = ax2.errorbar(positive_means, pct_positive, yerr=con_ints,
-                                fmt="-o", color=highlight_color, markersize=8,
-                                capsize=8)
+                                fmt="-o", color=highlight_color, markersize=2,
+                                capsize=1, linewidth=.5)
     for cap in caps:
         cap.set_markeredgewidth(1)
-    ax2.text(.6, .85, '$R^2$: {0:0.2f}'.format(r2), color=highlight_color,
-             fontsize=15)
     ax2.tick_params(axis='y', colors=highlight_color)
-    ax2.set_ylabel("Percent call agreement")
+    if y2_label:
+        ax2.set_ylabel("Percent call agreement", fontsize=8)
+    ax2.yaxis.labelpad = 1
 
-    plt.show()
+    ax2.text(.15, .5, 'r={0:0.2f}'.format(r), color=highlight_color,
+             fontsize=8)
+    if legend:
+        return ax1.legend((rects1[0], rects2[0]),
+                          ('Prediction disagrees with call',
+                           'Prediction agrees with call'),
+                          loc='lower left', bbox_to_anchor=(0, -0.4),
+                          fontsize=8)
 
 
-def create_roc_curve(Y, probabilities, class_lookup, title):
+def create_roc_curve(Y, probabilities, class_lookup, title, ax):
     '''Create ROC curve to compare multiclass model performance.
 
     Parameters:
@@ -114,7 +128,7 @@ def create_roc_curve(Y, probabilities, class_lookup, title):
     fpr = dict()
     tpr = dict()
     roc_auc = dict()
-    plt.title(title)
+    ax.set_title(title)
     if n_classes == 3:
         colors = cycle(['orange', 'red', 'black'])
     else:
@@ -122,17 +136,16 @@ def create_roc_curve(Y, probabilities, class_lookup, title):
     for i, color in zip(range(n_classes), colors):
         fpr[i], tpr[i], _ = metrics.roc_curve(Y[:, i], probabilities[:, i])
         roc_auc[i] = metrics.auc(fpr[i], tpr[i])
-        plt.plot(fpr[i], tpr[i], color=color, label='ROC curve of class '
-                                                    '{0} (area = {1:0.2f}'
-                                                    ')'.format(class_lookup[i],
-                                                               roc_auc[i]))
-    plt.plot([0, 1], [0, 1], 'k--')
-    plt.xlim([-0.01, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.legend(loc="lower right")
-    plt.show()
+        ax.plot(fpr[i], tpr[i], color=color,
+                label='ROC curve of class {0} (area = {1:0.2f})'.format(
+                    class_lookup[i], roc_auc[i]))
+    ax.plot([0, 1], [0, 1], 'k--')
+    ax.set_xlim([-0.01, 1.0])
+    ax.set_ylim([0.0, 1.05])
+    ax.set_xlabel('False Positive Rate')
+    ax.set_ylabel('True Positive Rate')
+    ax.legend(loc="lower right")
+    # plt.show()
 
 
 def create_feature_importance_plot(feature_importance_metrics, title):
@@ -158,3 +171,20 @@ def create_feature_importance_plot(feature_importance_metrics, title):
     plt.xlabel('Delta average AUC')
     plt.ylabel('Feature')
     plt.title(title)
+
+
+def make_model_output_plot(probabilities, title):
+    """Make plot that show the distribution of model output
+
+        Parameters:
+            probabilities (numpy.array): array of model output with samples
+                                         on row and classes in columns
+            title (str): Plot title
+    """
+    ax = sns.distplot(probabilities[:, 0:1])
+    sns.distplot(probabilities[:, 1:2], ax=ax)
+    sns.distplot(probabilities[:, 2:3], ax=ax)
+    ax.legend(['Ambiguous', 'Fail', 'Somatic'])
+    ax.set_xlabel('Model output')
+    ax.set_ylabel('Density')
+    ax.set_title(title)
