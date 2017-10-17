@@ -17,4 +17,4 @@ Install the package using the editable (`-e` option) mode for ease in developmen
 ### Test
 
 To run tests Download GRCH37 fasta and fasta index file to home directory as 
-'~/grch37.fa' and '~/grch37.fa.fai'
+'\~/grch37.fa' and '\~/grch37.fa.fai'
