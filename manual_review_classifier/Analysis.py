@@ -159,3 +159,54 @@ def predict_classes(probabilities):
 
     label_binarizer.fit(range(max(predicted) + 1))
     return label_binarizer.transform(predicted)
+
+
+def get_somatic_error_type(truth, prediction):
+    """Return a dataframe that outlines the somaric error type i.e. False pos
+
+    Args:
+        truth (np.array): one hot encoded array with truth labels columns=
+                          ['a', 'f', 's']
+        prediction (np.array): one column array of predictions. 0=a, 1=f, 2=s
+    Returns:
+        (pandas.DataFrame): dataframe with columns truth label, predicted
+                            label, and somatic error type
+    """
+    somatic_error_type = []
+    label_binarizer = preprocessing.LabelBinarizer()
+    label_binarizer.fit(range(max(prediction)+1))
+    predicted_transformed = label_binarizer.transform(prediction)
+    somatic_prediction = predicted_transformed[:, 2:]
+    for call in range(len(somatic_prediction)):
+        if somatic_prediction[call] and truth[:, 2:][call]:
+            somatic_error_type.append('True Positive')
+        elif somatic_prediction[call] and not truth[:, 2:][call]:
+            somatic_error_type.append('False Positive')
+        elif not somatic_prediction[call] and truth[:, 2:][call]:
+            somatic_error_type.append('False Negative')
+        elif not somatic_prediction[call] and not truth[:, 2:][call]:
+            somatic_error_type.append('True Negative')
+    somatic_error = pd.DataFrame([np.argmax(truth, axis=1), prediction,
+                                  np.array(somatic_error_type)]).T
+    somatic_error.columns = ['truth', 'prediction', 'error']
+    somatic_error.replace({0: 'a', 1: 'f', 2: 's'}, inplace=True)
+    return somatic_error
+
+
+def calculate_kappa(table):
+    """https://en.wikipedia.org/wiki/Fleiss%27_kappa"""
+    N, k = table.shape
+
+    n = table.sum(axis=1)[0]
+
+    p = table.sum(axis=0) / (N * n)
+
+    P = (1 / (n * (n - 1))) * ((table ** 2).sum(axis=1) - n)
+
+    p_bar = P.sum() / N
+
+    P_e = (p ** 2).sum()
+
+    kappa = (p_bar - P_e) / (1 - P_e)
+
+    return kappa
