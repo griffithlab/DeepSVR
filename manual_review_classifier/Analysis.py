@@ -181,9 +181,9 @@ def get_somatic_error_type(truth, prediction):
         if somatic_prediction[call] and truth[:, 2:][call]:
             somatic_error_type.append('True Positive')
         elif somatic_prediction[call] and not truth[:, 2:][call]:
-            somatic_error_type.append('False Positive')
-        elif not somatic_prediction[call] and truth[:, 2:][call]:
             somatic_error_type.append('False Negative')
+        elif not somatic_prediction[call] and truth[:, 2:][call]:
+            somatic_error_type.append('False Positive')
         elif not somatic_prediction[call] and not truth[:, 2:][call]:
             somatic_error_type.append('True Negative')
     somatic_error = pd.DataFrame([np.argmax(truth, axis=1), prediction,
