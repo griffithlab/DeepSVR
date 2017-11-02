@@ -9,14 +9,12 @@ def determine_feature_importance(model, X, Y, remove_reviewer):
        time and evaluated the performace of each feature individually.
 
         Args:
-            model (KerasClassifier): Model to fit
+            model (KerasClassifier): Trained model
             X (numpy.array): Features
             Y (numpy.array): Classes
             remove_reviewer (bool): True removes reviewer feature
 
         Returns (pandas.Dataframe) Dataframe of accuracy measures"""
-
-    model.fit(X, Y)
 
     unshuffled_auc = get_roc_auc(model.predict_proba(X), Y)
 
