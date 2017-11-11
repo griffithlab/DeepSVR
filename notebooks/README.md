@@ -1,7 +1,15 @@
 # Notebooks
 
 ## Preprocessing notebooks
-These notebooks are ran in the order listed
+These notebooks are run in the order listed to prepare the training data.
+
+Before running these notebooks please unzip the raw bam-readcount files in
+`../data/bam-read-counts/normal.zip`. A folder named `normal` should be in the 
+`../data/bam-read-counts/` directory.
+
+Note: running these notebooks is not necessary to run the machine learning 
+models. The result of these notebooks, `../data/training_data.pkl`, is available
+in the repository.
 
 ### 1. Add project specific features.ipynb
 Add disease and reviewer information to analysis
