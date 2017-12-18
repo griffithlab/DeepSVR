@@ -66,7 +66,7 @@ class ClassifyData:
         else:
             processed_data['solid_tumor'] = 0
         
-        X = 
+        X = samples.sort_index(axis=1).astype(float).values
         
         return estimator.predict_proba(X)
         
