@@ -1,0 +1,2 @@
+sample_name	tumor_bam	normal_bam	review_path	reviewer	disease	reference
+H_NP-234000-M1501537	/data/tumor_sample.bam	/data/normal_sample.bam	/data/review_samples.bed	XXX	SCLC	/data/all_sequences.fa
