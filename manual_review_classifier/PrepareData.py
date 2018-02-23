@@ -76,7 +76,8 @@ class PrepareData:
         for sample in self.samples:
             print('-----------------------------------------------------'
                   '\nStarting on sample {0}\n'.format(sample[0]))
-            reviewer_specified_in_sample = sample[4] != ''
+            reviewer_specified_in_sample = False
+            #reviewer_specified_in_sample = sample[4] != ''
             sites_file_path = os.path.join(out_dir_path, sample[0] + '.sites')
             review = self._parse_review_file(sample[3], sites_file_path,
                                              sample[0])
