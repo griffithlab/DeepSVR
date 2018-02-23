@@ -1,8 +1,9 @@
 import pkg_resources
 import click
 
-from manual_review_classifier.PrepareData import PrepareData
-from manual_review_classifier.ClassifyData import ClassifyData
+from PrepareData import PrepareData
+from ClassifyData import ClassifyData
+from ReadCount import ReadCount
 
 def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
@@ -24,7 +25,7 @@ def print_version(ctx, param, value):
               default=False,
               help='If bam readcount files already exist in output directory, '
                    'skip the bam-readcount step')
-@click.option('--solid_tumor/--not-solid_tumor',
+@click.option('--solid_tumor/--no-solid_tumor',
               default=False,
               help='Designate if tumor is solid tumor or hematologic tumor')
 @click.option('--sample-file-path', '-sfp',
@@ -45,10 +46,10 @@ def print_version(ctx, param, value):
                    '(default:~/training_data)')
 @click.option('--classifier', '-cl', default='~/deep_learning_classifier.json',
               help='Specify classifier file: compressed .json '
-                   '(default:~/deep_learning_classifier.json)')
+                   '(default: ../data/deep_learning_classifier.json)')
 
 
-def main(header, skip_bam_readcount, sample_file_path,  output_dir_path, classifier, hematologic_tumor):
+def main(header, skip_bam_readcount, sample_file_path, output_dir_path, classifier, solid_tumor):
     """
     Prepare data for training or classification in manual review model.
     """
