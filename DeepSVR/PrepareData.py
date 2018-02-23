@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 from zero_one_based_conversion import convert
-from manual_review_classifier.ReadCount import ReadCount
+from ReadCount import ReadCount
 
 from sklearn import preprocessing
 
@@ -35,7 +35,7 @@ class PrepareData:
         """
         self._parse_samples_file(samples_file_path, header)
         self.out_dir_path = out_dir_path
-        self.training_data = pd.DataFrame()
+        self.training_data = pd.DataFrame(columns=['chromosome', 'start', 'stop', 'ref', 'var', 'disease'])
         self.categorical_columns = list()
         self._run_bam_readcount(skip_readcount)
 
@@ -71,8 +71,7 @@ class PrepareData:
         out_dir_path = os.path.join(self.out_dir_path, 'readcounts')
         if not os.path.exists(out_dir_path):
             os.makedirs(out_dir_path)
-        self.review = pd.DataFrame(columns=['chromosome', 'start', 'stop',
-                                            'ref', 'var', 'call', 'reviewer'])
+        self.review = pd.DataFrame()
         for sample in self.samples:
             print('-----------------------------------------------------'
                   '\nStarting on sample {0}\n'.format(sample[0]))
