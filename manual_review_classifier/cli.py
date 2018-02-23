@@ -2,6 +2,8 @@ import pkg_resources
 import click
 
 from manual_review_classifier.PrepareData import PrepareData
+from ClassifyData import ClassifyData
+from ReadCount import ReadCount
 
 
 def print_version(ctx, param, value):
@@ -24,7 +26,7 @@ def print_version(ctx, param, value):
               default=False,
               help='If bam readcount files already exist in output directory, '
                    'skip the bam-readcount step')
-@click.option('--sample-file-path', '-sfp',
+@click.option('--samples-file-path', '-sfp',
               help='File path of tsv file with sample information. File should'
                    'have the following columns in order: sample_name, '
                    'tumor_bam_path, normal_bam_path, manual_review_file_path'
@@ -40,12 +42,23 @@ def print_version(ctx, param, value):
               help='Specify output directory: Readcount files and compressed '
                    'pandas dataframe will be output here '
                    '(default:~/training_data)')
-def main(header, skip_bam_readcount, sample_file_path,  output_dir_path):
+@click.option('--classifier', '-cl', default='~/deep_learning_classifier.json',
+              help='Specify classifier file: compressed .json '
+                   '(default: ../data/deep_learning_classifier.json)')
+@click.option('--solid_tumor/--no-solid_tumor',
+              default=True,
+              help='Designate if tumor is solid tumor or hematologic tumor')
+
+
+
+def main(header, skip_bam_readcount, samples_file_path, output_dir_path, classifier, solid_tumor):
     """
     Prepare data for training or classification in manual review model.
     """
 
-    PrepareData(sample_file_path, header, output_dir_path, skip_bam_readcount)
+    
+    PrepareData(samples_file_path, header, output_dir_path, skip_bam_readcount)
+    ClassifyData(solid_tumor, classifier, samples_file_path, header, output_dir_path)
 
 
 if __name__ == '__main__':
