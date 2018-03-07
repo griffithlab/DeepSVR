@@ -140,8 +140,8 @@ def create_roc_curve(Y, probabilities, class_lookup, title, ax):
                 label='ROC curve of class {0} (area = {1:0.2f})'.format(
                     class_lookup[i], roc_auc[i]))
     ax.plot([0, 1], [0, 1], 'k--')
-    ax.set_xlim([-0.01, 1.0])
-    ax.set_ylim([0.0, 1.05])
+    ax.set_xlim([0, 1.0])
+    ax.set_ylim([0.0, 1.0])
     ax.set_xlabel('False Positive Rate')
     ax.set_ylabel('True Positive Rate')
     ax.legend(loc="lower right")
