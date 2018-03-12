@@ -3,6 +3,9 @@ import pandas as pd
 import numpy as np
 import sklearn
 from sklearn import preprocessing
+from keras.models import model_from_json
+os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
+import tensorflow as tf
 
 
 class ClassifyData:
@@ -11,60 +14,60 @@ class ClassifyData:
 
     """
 
-    def __init__(self, processed_data, classifier, solid_tumor):
+    def __init__(self, solid_tumor, sample_file_path, header):
         """Assemble pandas.Dataframe of data
 
             Args:
-                processed_data (str): File path of tab-separated
-                                         file outlining the tumor bam path,
-                                         normal bam path, and manual review
-                                         sites file path (this should be a
-                                         one-based tsv file containing
-                                         chromosome, start, and stop),
-                                         disease, reference fasta file path
-                classifier (str): trained classifier located in the folder
                 solid_tumor (bool): True if solid tumor, False otherwise (i.e. hematologic tumor).
         """
-        self._parse_samples_file(samples_file_path, header)
-        self.classify_samples(samples, solid_tumor, classifier)
-        self.processed_data = processed_data
-
-    def parse_samples(processed_data):
-        """parse processed data to return samples
-
-            Args:
-                processed_data (str): File path of tab-separated
-                                         file outlining the tumor bam path,
-                                         normal bam path, and manual review
-                                         sites file path (this should be a
-                                         one-based tsv file containing
-                                         chromosome, start, and stop),
-                                         disease, reference fasta file path
-        """
         
-        with open(processed_data) as f:
-            samples = f.readlines()
-            samples = [x.strip() for x in samples]
-            samples = [x.split('\t') for x in samples]
-        self.samples = samples
-        
-    def classify_samples(classifier, solid_tumor, processed_data):
+        self.classify_samples(solid_tumor, sample_file_path, header)
+    
+    
+    def classify_samples(self, solid_tumor, sample_file_path, header):
         """classify processed data using classifier
 
             Args:
                 classifier (str): trained classifier located in the folder
+           
+                samples_file_path (str): File path of tab-separated
+                             file outlining the tumor bam path,
+                             normal bam path, and manual review
+                             sites file path (this should be a
+                             one-based tsv file containing
+                             chromosome, start, and stop),
+                             disease, reference fasta file path
+                header (bool): True if header False otherwise.
         """
-        
-        model = model_from_json(open('deep_learning_classifier.json').read())
+
+        json_file = open('data/deep_learning_classifier.json', 'r')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        loaded_model = model_from_json(loaded_model_json)
+        # load weights into new model
+        loaded_model.load_weights("data/model.h5")
+        print("Loaded model from disk")
+ 
+        # evaluate loaded model on test data
+    
+        processed_data = pd.read_pickle('Output/train.pkl')
+        processed_data = processed_data[processed_data.columns.drop(list(processed_data.filter(regex='disease')))]
         
         if solid_tumor:
             processed_data['solid_tumor'] = 1
         else:
             processed_data['solid_tumor'] = 0
+            
+        X = processed_data.sort_index(axis=1).astype(float).values
         
-        X = samples.sort_index(axis=1).astype(float).values
+        calls = pd.read_pickle('Output/call.pkl')
+        Y = pd.get_dummies(calls).astype(float).values
         
-        return estimator.predict_proba(X)
+        predictions = loaded_model.predict_proba(X)
+        header = 'Ambiguous, Fail, Somatic'
+
+        np.savetxt("Output/predictions.csv", predictions, delimiter="\t", fmt='%s', header=header)
+        
         
         
         
