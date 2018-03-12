@@ -1,5 +1,5 @@
 # Create Classifier
-USAGE: python3 CreateClassifier.py <training data path>
+USAGE: python3 CreateClassifier.py (training data path)
 
 EXAMPLE: python3 CreateClassifier.py /data/training_data.pkl
 
@@ -26,7 +26,7 @@ EXAMPLE: python3 CreateClassifier.py /data/training_data.pkl
 
 
 # Classifier Data
-USAGE: python3 cli.py  <header?> <bam-readcounts?> <sample file path> <solid tumor?> <output path>
+USAGE: python3 cli.py  (header?) (bam-readcounts?) (sample file path) (solid tumor?) (output path)
 
 EXAMPLE: python3 cli.py --no-header --no-skip_bam_readcount --samples-file-path /Users/ebarnell/manual_review_classifier/manual_review_classifier/tests/test_data/samples.noheader.tsv  --solid_tumor --output-dir-path output/
 
