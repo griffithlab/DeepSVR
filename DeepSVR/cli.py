@@ -3,7 +3,7 @@ import click
 
 from PrepareData import PrepareData
 from ClassifyData import ClassifyData
-#from ReadCount import ReadCount
+from ReadCount import ReadCount
 
 def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
@@ -55,7 +55,7 @@ def main(header, skip_bam_readcount, sample_file_path, output_dir_path, classifi
     """
 
     PrepareData(sample_file_path, header, output_dir_path, skip_bam_readcount)
-    #ClassifyData(processed_data, classifier, solid_tumor)
+    ClassifyData(solid_tumor, sample_file_path, header)
 
 
 if __name__ == '__main__':
