@@ -7,9 +7,7 @@ Usage: python3 CreateClassifier.py <training data path>
 Input:
  1) training data path = path to pkl dataframe
      
-     NOTE: To view required headers run: 
-         training_data = pd.read_pickle('/data/training_data.pkl')
-         list(training_data.columns.values)
+     NOTE: Run Prepare data on training data to get formatted input .pkl
 
 Output:
  1) classifier stored as .json() file
