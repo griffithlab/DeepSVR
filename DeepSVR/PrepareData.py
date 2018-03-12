@@ -77,13 +77,10 @@ class PrepareData:
             print('-----------------------------------------------------'
                   '\nStarting on sample {0}\n'.format(sample[0]))
             reviewer_specified_in_sample = False
-            #reviewer_specified_in_sample = sample[4] != ''
             sites_file_path = os.path.join(output_dir_path, sample[0] + '.sites')
             review = self._parse_review_file(sample[3], sites_file_path, sample[0])
-            reviewer_in_bed_file = 'reviewer'
+            reviewer_in_bed_file = False
             review['disease'] = sample[5]
-            #if reviewer_specified_in_sample:
-                #review['reviewer'] = sample[4]
             self.review = pd.concat([self.review, review], ignore_index=True)
             bed_one_based_f_path = sample[3] + '.one_based'
             print('Processing tumor bam file:\n\t{0}'.format(sample[1]))
@@ -102,6 +99,7 @@ class PrepareData:
                                                           'tumor',
                                                           reviewer_in_bed_file,
                                                           sample[5])
+
             print('Processing normal bam file:\n\t{0}'.format(sample[2]))
             normal_readcount_file_path = '{0}/{1}_normal' \
                                          '.readcounts'.format(output_dir_path,
@@ -118,32 +116,20 @@ class PrepareData:
             if len(tumor_data) != len(normal_data):
                 raise ValueError(
                     'Dataframes cannot be merged. They are differing lengths.')
-            #if reviewer_in_bed_file:
-                #individual_df = pd.merge(tumor_data, normal_data,
-                                         #on=['chromosome', 'start', 'stop',
-                                             #'ref', 'var', 'call', 'disease',
-                                             #'reviewer'])
-            #elif reviewer_specified_in_sample:
-                #individual_df = pd.merge(tumor_data, normal_data,
-                                         #on=['chromosome', 'start', 'stop',
-                                             #'ref', 'var', 'call', 'disease'])
-                #individual_df['reviewer'] = sample[4]
-            #else:
+            
             individual_df = pd.merge(tumor_data, normal_data,
                                          on=['chromosome', 'start', 'stop',
                                              'ref', 'var', 'call', 'disease'])
+
             individual_df.index = (sample[0] + '~' + individual_df.chromosome +
                                    ':' + individual_df.start.map(str) + '-' +
                                    individual_df.stop.map(str) +
                                    individual_df.ref + '>' +
                                    individual_df['var'])
             self.training_data = pd.concat([self.training_data, individual_df])
-
         self.training_data.drop(['chromosome', 'start', 'stop', 'ref', 'var'],
                                 axis=1, inplace=True)
         self._perform_one_hot_encoding('disease')
-        #if reviewer_specified_in_sample or reviewer_in_bed_file:
-            #self._perform_one_hot_encoding('reviewer')
         self.calls = self.training_data.pop('call')
 
         # normalize continuous variables
@@ -194,6 +180,7 @@ class PrepareData:
                    'tumor_var_num_minus_strand', 'tumor_var_num_plus_strand',
                    'tumor_var_num_q2_containing_reads']
         to_normalize = self.training_data[columns]
+        
         # Source http://stackoverflow.com/a/26415620
         x = to_normalize.values
         min_max_scaler = preprocessing.MinMaxScaler()
@@ -227,12 +214,7 @@ class PrepareData:
         manual_review.columns = map(str.lower, manual_review.columns)
         manual_review.rename(columns={'reference': 'ref', 'variant': 'var'},
                              inplace=True)
-        if 'reviewer' in manual_review.columns:
-            manual_review = manual_review[['chromosome', 'start', 'stop',
-                                           'ref', 'var', 'call',
-                                           'reviewer']]
-        else:
-            manual_review = manual_review[['chromosome', 'start', 'stop',
+        manual_review = manual_review[['chromosome', 'start', 'stop',
                                            'ref', 'var', 'call']]
         manual_review = manual_review.apply(self._convert_one_based, axis=1)
         manual_review = manual_review.replace('', np.nan).dropna(how='all')
