@@ -80,7 +80,7 @@ class PrepareData:
             sites_file_path = os.path.join(output_dir_path, sample[0] + '.sites')
             review = self._parse_review_file(sample[3], sites_file_path, sample[0])
             reviewer_in_bed_file = False
-            review['disease'] = sample[5]
+            review['disease'] = sample[4]
             self.review = pd.concat([self.review, review], ignore_index=True)
             bed_one_based_f_path = sample[3] + '.one_based'
             print('Processing tumor bam file:\n\t{0}'.format(sample[1]))
@@ -89,7 +89,7 @@ class PrepareData:
                                                              sample[0])
             if not skip_readcount:
                 os.system('bam-readcount -i -w 0 -l {0} -f {1} '
-                          '{2} > {3}'.format(sites_file_path, sample[6],
+                          '{2} > {3}'.format(sites_file_path, sample[5],
                                              sample[1],
                                              tumor_readcount_file_path))
 
@@ -98,7 +98,7 @@ class PrepareData:
             tumor_data = tumor_rc.compute_variant_metrics(bed_one_based_f_path,
                                                           'tumor',
                                                           reviewer_in_bed_file,
-                                                          sample[5])
+                                                          sample[4])
 
             print('Processing normal bam file:\n\t{0}'.format(sample[2]))
             normal_readcount_file_path = '{0}/{1}_normal' \
@@ -106,13 +106,13 @@ class PrepareData:
                                                               sample[0])
             if not skip_readcount:
                 os.system('bam-readcount -i -w 0 -l {0} -f {1} '
-                          '{2} > {3}'.format(sites_file_path, sample[6],
+                          '{2} > {3}'.format(sites_file_path, sample[5],
                                              sample[2],
                                              normal_readcount_file_path))
             normal_rc = ReadCount(normal_readcount_file_path)
             normal_data = normal_rc.\
                 compute_variant_metrics(bed_one_based_f_path, 'normal',
-                                        reviewer_in_bed_file, sample[5])
+                                        reviewer_in_bed_file, sample[4])
             if len(tumor_data) != len(normal_data):
                 raise ValueError(
                     'Dataframes cannot be merged. They are differing lengths.')
