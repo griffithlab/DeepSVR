@@ -1,27 +1,42 @@
 # manual_review_classifier
-
-### Analysis
-
-All analysis is viewable in the `notebooks` directory
+### A walk-through of the manual_review_classifier repo can be found on the [Wiki page](https://github.com/griffithlab/manual_review_classifier/wiki)). 
 
 
-#### Dependencies of notebooks
-* Tensorflow 1.1.0
-* Keras 2.0.4
-* Scikit-learn 0.18.1
-* pandas 0.20.3
-* numpy 1.12.1
-* matplotlib 2.0.0
-* seaborn 0.7.1
+### Table of Contents
 
-### Installation of prepare data script
+<ol start="0">
+  <li><strong>Chapter 1 - Background Information</strong></li>
+  <ol start="i">
+    <li>Authors</li>
+    <li>Citation</li>
+    <li>About</li>
+    <li>Installation</li>
+  </ol>
+  <li><strong>Chapter 2 - Identification of Somatic Variants in Sequencing Data</strong></li>
+  <ol start="i">
+    <li>Automated Somatic Variant Calling</li>
+    <li>Somatic Variant Refinement (SVR)</li>
+  </ol>
+  <li><strong>Chapter 3 - Methods and Analysis for Machine Learning Models </strong></li>
+  <ol start="i">
+    <li>Data Assembly</li>
+    <li>Logistic Regression Model</li>
+    <li>Random Forest Model</li>
+    <li>Deep Learning Model/li>
+    <li>Model Evaluation</li>
+    <li>Inter-reviewer Variability</li>
+    <li>Orthogonal Validation</li>
+    <li>Re-review Analysis</li>
+  </ol>
+  <li><strong>Chapter 4 - Using DeepSVR (Deep Learning Model) </strong></li>
+  <ol start="i">  
+    <li>Create the Classifier/li>
+    <li>Prepare Your Data</li>
+    <li>Classify Your Data</li>
+  </ol>
+</ol>
 
-This script will run bam-readcount on bam files and assemble a pandas dataframe ready to be 
-used in machine learning as is done in `notebooks/Deep learning model.ipynb`.
-
-A tab separated sample file is required as input that outlines sample_name,
-tumor_bam_path, normal_bam_path, manual_review_file_path, reviewer, disease,
-and reference_genome_fasta_file_path. Use `-h` for mor information.
+### Installation of manual_review_classifier repo
 
 Install the package using the editable (`-e` option) mode for ease in development
 
