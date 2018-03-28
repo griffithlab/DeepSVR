@@ -2,7 +2,7 @@
 ### A walk-through of the manual_review_classifier repo can be found on the [Wiki page](https://github.com/griffithlab/manual_review_classifier/wiki). 
 
 
-### Table of Contents
+#### Table of Contents
 
 <ol start="0">
   <li><strong>Chapter 1 - Background Information</strong></li>
