@@ -39,16 +39,16 @@ class ClassifyData:
                              disease, reference fasta file path
                 header (bool): True if header False otherwise.
         """
-
+        # Pull in model from output folder
         json_file = open('data/deep_learning_classifier.json', 'r')
         loaded_model_json = json_file.read()
         json_file.close()
         loaded_model = model_from_json(loaded_model_json)
+        
         # load weights into new model
         loaded_model.load_weights("data/model.h5")
         print("Loaded model from disk")
- 
-        # evaluate loaded model on test data
+        print()
     
         processed_data = pd.read_pickle('Output/train.pkl')
         processed_data = processed_data[processed_data.columns.drop(list(processed_data.filter(regex='disease')))]
@@ -63,10 +63,15 @@ class ClassifyData:
         calls = pd.read_pickle('Output/call.pkl')
         Y = pd.get_dummies(calls).astype(float).values
         
-        predictions = loaded_model.predict_proba(X)
-        header = 'Ambiguous, Fail, Somatic'
+        probabilities = loaded_model.predict_proba(X)
+        
+        probs_df = pd.DataFrame(probabilities, columns=['Ambiguous', 'Fail', 'Somatic'], index=processed_data.index)
+        probs_df['Max'] = probs_df[['Ambiguous', 'Fail', 'Somatic']].max(axis=1)
+        probs_df['Call'] = pd.np.where(probs_df["Max"] == probs_df["Ambiguous"], "A",
+                   pd.np.where(probs_df["Max"] == probs_df["Somatic"], "S",
+                   pd.np.where(probs_df["Max"] == probs_df["Fail"], "F", 'NONE')))
 
-        np.savetxt("Output/predictions.csv", predictions, delimiter="\t", fmt='%s', header=header)
+        probs_df.to_csv("Output/predictions.csv", sep='\t', header=True)
         
         
         
