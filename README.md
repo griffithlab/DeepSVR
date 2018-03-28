@@ -1,27 +1,8 @@
 # manual_review_classifier
 
-### Analysis
+### Please view the Wiki page for a repository walk-through
 
-All analysis is viewable in the `notebooks` directory
-
-
-#### Dependencies of notebooks
-* Tensorflow 1.1.0
-* Keras 2.0.4
-* Scikit-learn 0.18.1
-* pandas 0.20.3
-* numpy 1.12.1
-* matplotlib 2.0.0
-* seaborn 0.7.1
-
-### Installation of prepare data script
-
-This script will run bam-readcount on bam files and assemble a pandas dataframe ready to be 
-used in machine learning as is done in `notebooks/Deep learning model.ipynb`.
-
-A tab separated sample file is required as input that outlines sample_name,
-tumor_bam_path, normal_bam_path, manual_review_file_path, reviewer, disease,
-and reference_genome_fasta_file_path. Use `-h` for mor information.
+### Installation of manual_review_classifier repo
 
 Install the package using the editable (`-e` option) mode for ease in development
 
