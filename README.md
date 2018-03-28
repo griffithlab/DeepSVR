@@ -1,4 +1,4 @@
-# View the [Wiki page](https://github.com/griffithlab/manual_review_classifier/wiki) for manual_review_classifier information
+# manual_review_classifier: [Wiki page](https://github.com/griffithlab/manual_review_classifier/wiki)
 
 ### Installation of manual_review_classifier repo
 
