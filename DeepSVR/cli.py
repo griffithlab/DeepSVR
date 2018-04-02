@@ -9,7 +9,7 @@ def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
     version = pkg_resources.\
-        get_distribution('manual_review_classifier').version
+        get_distribution('DeepSVR').version
     click.echo(version)
     ctx.exit()
 
