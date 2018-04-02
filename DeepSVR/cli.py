@@ -1,9 +1,9 @@
 import pkg_resources
 import click
 
-from PrepareData import PrepareData
-from ClassifyData import ClassifyData
-from ReadCount import ReadCount
+from .PrepareData import PrepareData
+from .ClassifyData import ClassifyData
+
 
 def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
