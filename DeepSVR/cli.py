@@ -61,4 +61,3 @@ def main(header, skip_bam_readcount, sample_file_path, output_dir_path, classifi
 
 if __name__ == '__main__':
     main()
-
