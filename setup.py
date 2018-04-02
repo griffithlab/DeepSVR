@@ -9,7 +9,7 @@ https://github.com/pypa/sampleproject
 from setuptools import setup, find_packages
 # To use a consistent encoding
 from codecs import open
-from os import paths
+from os import path
 
 here = path.abspath(path.dirname(__file__))
 
@@ -119,6 +119,7 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=['click', 'pkg_resources', 'pandas', 'numpy', 'sklearn', 'keras', 'tensorflow', 'seaborn', 'matplotlib', 'manual_review_classifier'],  # Optional
 
+    dependency_links=['https://github.com/griffithlab/manual_review_classifier/blob/setup/manual_review_classifier/dist/manual_review_classifier-0.0.1-py3.6.egg'],
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
     # syntax, for example:
