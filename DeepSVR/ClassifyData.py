@@ -71,7 +71,7 @@ class ClassifyData:
                    pd.np.where(probs_df["Max"] == probs_df["Somatic"], "S",
                    pd.np.where(probs_df["Max"] == probs_df["Fail"], "F", 'NONE')))
 
-        probs_df.to_csv("Output/predictions.csv", sep='\t', header=True)
+        probs_df.to_csv("Output/predictions.tsv", sep='\t', header=True)
         
         
         
