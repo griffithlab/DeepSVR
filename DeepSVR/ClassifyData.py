@@ -72,12 +72,3 @@ class ClassifyData:
                    pd.np.where(probs_df["Max"] == probs_df["Fail"], "F", 'NONE')))
 
         probs_df.to_csv("Output/predictions.tsv", sep='\t', header=True)
-        
-        
-        
-        
-        
-        
-        
-        
-        

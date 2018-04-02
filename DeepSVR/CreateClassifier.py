@@ -49,9 +49,17 @@ from itertools import cycle
 from manual_review_classifier.ClassifierPlots import create_reliability_diagram, create_roc_curve, create_feature_importance_plot, make_model_output_plot
 from manual_review_classifier.Analysis import determine_feature_importance, print_accuracy_and_classification_report, predict_classes, get_somatic_error_type, calculate_kappa
 
-def main():
+
+import click
+@click.command()
+@click.help_option('-h', '--help')
+@click.option('--training-file-path', '-tfp', default=None,
+              help='Specify file to be used to train a new classifier.')
+
+
+def main(training_file_path):
     # Create Data
-    training_data = pd.read_pickle(sys.argv[1])
+    training_data = pd.read_pickle(training_file_path)
     training_data = training_data.replace('g','f')
 
     # Get Labels
