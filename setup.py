@@ -14,7 +14,7 @@ from os import path
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
-with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
+with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 # Arguments marked as "Required" below must be included for upload to PyPI.
@@ -109,7 +109,7 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=['DeepSVR'],  # Required
+    packages=find_packages(),  # Required
 
     # This field lists other packages that your project depends on to run.
     # Any package you put here will be installed by pip when your project is
@@ -117,9 +117,9 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['click', 'pkg_resources', 'pandas', 'numpy', 'sklearn', 'keras', 'tensorflow', 'seaborn', 'matplotlib', 'manual_review_classifier'],  # Optional
+    install_requires=['click', 'setuptools', 'pandas', 'numpy', 'h5py', 'convert_zero_one_based', 'sklearn', 'keras', 'tensorflow', 'seaborn', 'matplotlib'],  # Optional
 
-    dependency_links=['https://github.com/griffithlab/manual_review_classifier/blob/setup/manual_review_classifier/dist/manual_review_classifier-0.0.1-py3.6.egg'],
+    dependency_links=['git+https://github.com/griffithlab/convert_zero_one_based.git#egg=convert_zero_one_based-0.0.1'],
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
     # syntax, for example:
@@ -140,8 +140,10 @@ setup(
     # MANIFEST.in as well.
     package_data={  # Optional
         'classifier': ['deep_learning_classifier.json'],
-        'model':['model.h5'],
+        'model': ['model.h5'],
     },
+
+    python_requires='>=3',
 
     # Although 'package_data' is the preferred approach, in some case you may
     # need to place data files outside of your packages. See:
@@ -159,7 +161,8 @@ setup(
     # executes the function `main` from this package when invoked:
     entry_points={  # Optional
         'console_scripts': [
-            'deepsvr=deepsvr.cli:main',
+            'deepsvr=DeepSVR.cli:main',
+            'createclassifier=DeepSVR.CreateClassifier'
         ],
     },
 
