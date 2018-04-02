@@ -49,45 +49,48 @@ from itertools import cycle
 from manual_review_classifier.ClassifierPlots import create_reliability_diagram, create_roc_curve, create_feature_importance_plot, make_model_output_plot
 from manual_review_classifier.Analysis import determine_feature_importance, print_accuracy_and_classification_report, predict_classes, get_somatic_error_type, calculate_kappa
 
+def main():
+    # Create Data
+    training_data = pd.read_pickle(sys.argv[1])
+    training_data = training_data.replace('g','f')
 
-# Create Data
-training_data = pd.read_pickle(sys.argv[1])
-training_data = training_data.replace('g','f')
+    # Get Labels
+    Y = pd.get_dummies(training_data.call).astype(float).values
+    # Get training data as numpy array, remove reviews because of non overlap
+    X = training_data.sort_index(axis=1).drop('call', axis=1).astype(float).values
 
-# Get Labels
-Y = pd.get_dummies(training_data.call).astype(float).values
-# Get training data as numpy array, remove reviews because of non overlap
-X = training_data.sort_index(axis=1).drop('call', axis=1).astype(float).values
+    print('Y Shape is: ', Y.shape)
+    print('X Shape is: ', X.shape)
 
-print('Y Shape is: ', Y.shape)
-print('X Shape is: ', X.shape)
+    # Set Model Seed
+    seed = 7
+    np.random.seed(seed)
+    kfold = KFold(n_splits=10, shuffle=True, random_state=seed)
 
-# Set Model Seed
-seed = 7
-np.random.seed(seed)
-kfold = KFold(n_splits=10, shuffle=True, random_state=seed)
+    # Create Model
+    model = Sequential()
+    model.add(Dense(59, input_dim=59, kernel_initializer='normal', activation='tanh', kernel_regularizer=l2(0.001)))
+    model.add(Dense(20, activation='tanh', kernel_regularizer=l2(0.001)))
+    model.add(Dense(20, activation='tanh', kernel_regularizer=l2(0.001)))
+    model.add(Dense(20, activation='tanh', kernel_regularizer=l2(0.001)))
+    model.add(Dense(20, activation='tanh', kernel_regularizer=l2(0.001)))
+    model.add(Dense(3, kernel_initializer='normal', activation='softmax'))
 
-# Create Model
-model = Sequential()
-model.add(Dense(59, input_dim=59, kernel_initializer='normal', activation='tanh', kernel_regularizer=l2(0.001)))
-model.add(Dense(20, activation='tanh', kernel_regularizer=l2(0.001)))
-model.add(Dense(20, activation='tanh', kernel_regularizer=l2(0.001)))
-model.add(Dense(20, activation='tanh', kernel_regularizer=l2(0.001)))
-model.add(Dense(20, activation='tanh', kernel_regularizer=l2(0.001)))
-model.add(Dense(3, kernel_initializer='normal', activation='softmax'))
+    # Compile model
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-# Compile model
-model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    # Fit Model
+    model.fit(X, Y, epochs=1000, batch_size=2000, verbose=0)
 
-# Fit Model
-model.fit(X, Y, epochs=1000, batch_size=2000, verbose=0)
+    # Serialize Model to JSON
+    json_model = model.to_json()
+    with open('data/deep_learning_classifier.json', 'w') as json_file:
+        json_file.write(json_model)
 
-# Serialize Model to JSON
-json_model = model.to_json()
-with open('data/deep_learning_classifier.json', 'w') as json_file:
-    json_file.write(json_model)
+    # Serialize weights to HDF5
+    model.save_weights("data/model.h5")
+    print("Saved model to disk")
 
-# Serialize weights to HDF5
-model.save_weights("data/model.h5")
-print("Saved model to disk")
+if __name__ == '__main__':
 
+    main()
