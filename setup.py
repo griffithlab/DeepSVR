@@ -119,7 +119,7 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=['click', 'setuptools', 'pandas', 'numpy', 'h5py', 'convert_zero_one_based', 'sklearn', 'keras', 'tensorflow', 'seaborn', 'matplotlib'],  # Optional
 
-    dependency_links=['git+https://github.com/griffithlab/convert_zero_one_based.git#egg=convert_zero_one_based-0.0.1'],
+    # dependency_links=['git+https://github.com/griffithlab/convert_zero_one_based.git#egg=convert_zero_one_based-0.0.1'],
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
     # syntax, for example:
@@ -162,7 +162,7 @@ setup(
     entry_points={  # Optional
         'console_scripts': [
             'deepsvr=DeepSVR.cli:main',
-            'createclassifier=DeepSVR.CreateClassifier'
+            'createclassifier=DeepSVR.CreateClassifier:main'
         ],
     },
 
