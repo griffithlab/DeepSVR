@@ -1,1 +1,1 @@
-tst1	data/tst1.exome.tumor.bam	data/tst1.exome.normal.bam	data/tst1.review	BRC	data/grch37.fa	
+tst1	data/tst1.exome.tumor.bam	data/tst1.exome.normal.bam	data/tst1.review	BRC	~/grch37.fa	
