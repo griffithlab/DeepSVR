@@ -38,17 +38,7 @@
 
 ### Installation of manual_review_classifier repo
 
-Install the package using the editable (`-e` option) mode for ease in development
-
-`git clone [manual_review_classifier_link]`
-
-`cd manual_review_classifier`
-
-`pip install -e .`
-
-Test instalation 
-
-`prepare_manual_review_classifier_data -h`
+Go see the wiki.
 
 ### Test
 
