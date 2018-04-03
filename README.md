@@ -1,5 +1,5 @@
-# manual_review_classifier
-### A walk-through of the manual_review_classifier repo can be found on the [Wiki page](https://github.com/griffithlab/manual_review_classifier/wiki). 
+# DeepSVR
+### A walk-through of the DeepSVR repo can be found on the [Wiki page](https://github.com/griffithlab/manual_review_classifier/wiki). 
 
 ### Installation of manual_review_classifier repo
 
