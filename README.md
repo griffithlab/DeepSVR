@@ -1,7 +1,7 @@
 # DeepSVR
 ### A walk-through of the DeepSVR repo can be found on the [Wiki page](https://github.com/griffithlab/manual_review_classifier/wiki). 
 
-### Installation of manual_review_classifier repo
+### Installation of DeepSVR
 
 1) Compile and install [bam-readcount](https://github.com/genome/bam-readcount#build-instructions)
 2) Install DeepSVR with pip:  `pip install deepsvr`
