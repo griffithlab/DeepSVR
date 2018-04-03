@@ -3,7 +3,8 @@
 
 ### Installation of manual_review_classifier repo
 
-Go see the wiki.
+1) Compile and install [bam-readcount](https://github.com/genome/bam-readcount#build-instructions)
+2) Install DeepSVR with pip:  `pip install deepsvr`
 
 ### Test
 
