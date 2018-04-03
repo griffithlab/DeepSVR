@@ -1,15 +1,15 @@
 import pkg_resources
 import click
 
-from PrepareData import PrepareData
-from ClassifyData import ClassifyData
-from ReadCount import ReadCount
+from .PrepareData import PrepareData
+from .ClassifyData import ClassifyData
+
 
 def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
     version = pkg_resources.\
-        get_distribution('manual_review_classifier').version
+        get_distribution('deepsvr').version
     click.echo(version)
     ctx.exit()
 
@@ -56,8 +56,8 @@ def main(header, skip_bam_readcount, sample_file_path, output_dir_path, classifi
 
     PrepareData(sample_file_path, header, output_dir_path, skip_bam_readcount)
     ClassifyData(solid_tumor, sample_file_path, header)
+    print('Classification complete. Predictions in {}predictions.tsv'.format(output_dir_path))
 
 
 if __name__ == '__main__':
     main()
-
