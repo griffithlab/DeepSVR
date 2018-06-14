@@ -27,10 +27,24 @@ requirements:
     - bam-readcount
     - convert_zero_one_based
     - click
+    - tensorflow
+    - keras
+    - scikit-learn
+    - h5py
   run:
     - python
     - bam-readcount
+    - pandas
+    - numpy
     - scikit-learn
+    - matplotlib
+    - seaborn
+    - convert_zero_one_based
+    - click
+    - tensorflow
+    - keras
+    - scikit-learn
+    - h5py
 
 test:
   requires:
