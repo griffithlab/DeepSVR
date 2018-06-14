@@ -3,7 +3,6 @@ import click
 
 from manual_review_classifier.PrepareData import PrepareData
 from ClassifyData import ClassifyData
-from ReadCount import ReadCount
 
 
 def print_version(ctx, param, value):
@@ -48,17 +47,14 @@ def print_version(ctx, param, value):
 @click.option('--solid_tumor/--no-solid_tumor',
               default=True,
               help='Designate if tumor is solid tumor or hematologic tumor')
-
-
-
-def main(header, skip_bam_readcount, samples_file_path, output_dir_path, classifier, solid_tumor):
+def main(header, skip_bam_readcount, samples_file_path, output_dir_path,
+         classifier, solid_tumor):
     """
     Prepare data for training or classification in manual review model.
     """
-
-    
     PrepareData(samples_file_path, header, output_dir_path, skip_bam_readcount)
-    ClassifyData(solid_tumor, classifier, samples_file_path, header, output_dir_path)
+    ClassifyData(solid_tumor, classifier,
+                 samples_file_path, header, output_dir_path)
 
 
 if __name__ == '__main__':
