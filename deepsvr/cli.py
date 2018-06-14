@@ -47,16 +47,16 @@ def print_version(ctx, param, value):
 @click.option('--classifier', '-cl', default='~/deep_learning_classifier.json',
               help='Specify classifier file: compressed .json '
                    '(default: ../data/deep_learning_classifier.json)')
-
-
-def main(header, skip_bam_readcount, sample_file_path, output_dir_path, classifier, solid_tumor):
+def main(header, skip_bam_readcount, sample_file_path,
+         output_dir_path, solid_tumor):
     """
     Prepare data for training or classification in manual review model.
     """
 
     PrepareData(sample_file_path, header, output_dir_path, skip_bam_readcount)
     ClassifyData(solid_tumor, sample_file_path, header)
-    print('Classification complete. Predictions in {}predictions.tsv'.format(output_dir_path))
+    print('Classification complete. '
+          'Predictions in {}predictions.tsv'.format(output_dir_path))
 
 
 if __name__ == '__main__':
