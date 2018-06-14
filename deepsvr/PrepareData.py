@@ -76,9 +76,10 @@ class PrepareData:
         for sample in self.samples:
             print('-----------------------------------------------------'
                   '\nStarting on sample {0}\n'.format(sample[0]))
-            reviewer_specified_in_sample = False
-            sites_file_path = os.path.join(output_dir_path, sample[0] + '.sites')
-            review = self._parse_review_file(sample[3], sites_file_path, sample[0])
+            sites_file_path = os.path.join(output_dir_path,
+                                           sample[0] + '.sites')
+            review = self._parse_review_file(sample[3], sites_file_path,
+                                             sample[0])
             reviewer_in_bed_file = False
             review['disease'] = sample[4]
             self.review = pd.concat([self.review, review], ignore_index=True)
@@ -116,10 +117,10 @@ class PrepareData:
             if len(tumor_data) != len(normal_data):
                 raise ValueError(
                     'Dataframes cannot be merged. They are differing lengths.')
-            
+
             individual_df = pd.merge(tumor_data, normal_data,
-                                         on=['chromosome', 'start', 'stop',
-                                             'ref', 'var', 'call', 'disease'])
+                                     on=['chromosome', 'start', 'stop',
+                                         'ref', 'var', 'call', 'disease'])
 
             individual_df.index = (sample[0] + '~' + individual_df.chromosome +
                                    ':' + individual_df.start.map(str) + '-' +
@@ -180,7 +181,7 @@ class PrepareData:
                    'tumor_var_num_minus_strand', 'tumor_var_num_plus_strand',
                    'tumor_var_num_q2_containing_reads']
         to_normalize = self.training_data[columns]
-        
+
         # Source http://stackoverflow.com/a/26415620
         x = to_normalize.values
         min_max_scaler = preprocessing.MinMaxScaler()
@@ -207,7 +208,6 @@ class PrepareData:
                                        axis=1)
         self.training_data.drop(column, axis=1, inplace=True)
 
-
     def _parse_review_file(self, manual_review_file_path, sites_file_path,
                            sample_name):
         manual_review = pd.read_csv(manual_review_file_path, sep='\t')
@@ -215,7 +215,7 @@ class PrepareData:
         manual_review.rename(columns={'reference': 'ref', 'variant': 'var'},
                              inplace=True)
         manual_review = manual_review[['chromosome', 'start', 'stop',
-                                           'ref', 'var', 'call']]
+                                       'ref', 'var', 'call']]
         manual_review = manual_review.apply(self._convert_one_based, axis=1)
         manual_review = manual_review.replace('', np.nan).dropna(how='all')
         manual_review[['chromosome', 'start', 'stop']].to_csv(sites_file_path,
@@ -229,4 +229,3 @@ class PrepareData:
     def _convert_one_based(self, row):
         return convert.coordinate_system('\t'.join(map(str, row.values)),
                                          'to_one_based').strip().split('\t')
-
