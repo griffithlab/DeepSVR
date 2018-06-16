@@ -1,1 +1,0 @@
-tst1	./manual_review_classifier/tests/test_data/tst1.exome.tumor.bam	./manual_review_classifier/tests/test_data/tst1.exome.normal.bam	./manual_review_classifier/tests/test_data/tst1.review		BRC	~/grch37.fa
