@@ -1,8 +1,8 @@
 from unittest import TestCase
-from manual_review_classifier.PrepareData import PrepareData
+from deepsvr.PrepareData import PrepareData
 import os
 
-TEST_DATA_BASE_DIR = './manual_review_classifier/tests/test_data'
+TEST_DATA_BASE_DIR = './deepsvr/tests/test_data'
 
 
 def file_len(fname):
