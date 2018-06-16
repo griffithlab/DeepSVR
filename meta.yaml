@@ -1,5 +1,5 @@
 package:
-  name: manual_review_classifier
+  name: deepsvr
   version: "0.0.1"
 
 source:
@@ -11,7 +11,7 @@ build:
     - nosetests --verbose
     - python setup.py install
   entry_points:
-    - prepare_manual_review_classifier_data = manual_review_classifier.cli:main
+    - deepsvr = deepsvr.cli:main
 
 requirements:
   build:
@@ -50,9 +50,9 @@ test:
   requires:
     - nose
   imports:
-    - manual_review_classifier
+    - deepsvr
 
 
 about:
-  home: https://github.com/bainscou/manual_review_classifier
+  home: https://github.com/griffithlab/deepsvr
   license: MIT

@@ -1,7 +1,8 @@
 from unittest import TestCase
-from manual_review_classifier.ReadCount import ReadCount
 
-TEST_DATA_ROOT = 'manual_review_classifier/tests/test_data/'
+from deepsvr.ReadCount import ReadCount
+
+TEST_DATA_ROOT = 'deepsvr/tests/test_data/'
 
 
 class TestReadCount(TestCase):
