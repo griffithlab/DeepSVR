@@ -77,7 +77,7 @@ setup(
     # This field corresponds to the "Home-Page" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#home-page-optional
     url='https://github.com/griffithlab/'
-        'manual_review_classifier/tree/master/deepsvr',  # Optional
+        'DeepSVR/tree/master/deepsvr',  # Optional
 
     # This should be your name or the name of the organization which owns the
     # project.
