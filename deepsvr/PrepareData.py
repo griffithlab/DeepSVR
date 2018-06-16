@@ -1,11 +1,11 @@
 import os
-import pandas as pd
+
 import numpy as np
-
-from zero_one_based_conversion import convert
-from manual_review_classifier.ReadCount import ReadCount
-
+import pandas as pd
 from sklearn import preprocessing
+from zero_one_based_conversion import convert
+
+from deepsvr.ReadCount import ReadCount
 
 
 class PrepareData:
@@ -15,7 +15,7 @@ class PrepareData:
 
     """
 
-    def __init__(self, samples_file_path, header, output_dir_path,
+    def __init__(self, samples_file_path, header, out_dir_path,
                  skip_readcount):
         """Assemble pandas.Dataframe of data
 
@@ -28,13 +28,13 @@ class PrepareData:
                                          chromosome, start, and stop),
                                          disease, reference fasta file path
                 header (bool): True if header False otherwise.
-                output_dir_path (str): path for output directory
+                out_dir_path (str): path for output directory
                 skip_readcount (bool): skip the read counting step by reading
                                        in the read count files from a prior run
                                        in the output directory.
         """
         self._parse_samples_file(samples_file_path, header)
-        self.output_dir_path = output_dir_path
+        self.out_dir_path = out_dir_path
         self.training_data = pd.DataFrame()
         self.categorical_columns = list()
         self._run_bam_readcount(skip_readcount)
@@ -68,29 +68,31 @@ class PrepareData:
                                        in the read count files from a prior run
                                        in the output directory.
         """
-        output_dir_path = os.path.join(self.output_dir_path, 'readcounts')
-        if not os.path.exists(output_dir_path):
-            os.makedirs(output_dir_path)
+        out_dir_path = os.path.join(self.out_dir_path, 'readcounts')
+        if not os.path.exists(out_dir_path):
+            os.makedirs(out_dir_path)
         self.review = pd.DataFrame(columns=['chromosome', 'start', 'stop',
-                                            'ref', 'var', 'call', 'disease'])
+                                            'ref', 'var', 'call', 'reviewer'])
         for sample in self.samples:
             print('-----------------------------------------------------'
                   '\nStarting on sample {0}\n'.format(sample[0]))
-            sites_file_path = os.path.join(output_dir_path,
-                                           sample[0] + '.sites')
+            reviewer_specified_in_sample = sample[4] != ''
+            sites_file_path = os.path.join(out_dir_path, sample[0] + '.sites')
             review = self._parse_review_file(sample[3], sites_file_path,
                                              sample[0])
-            reviewer_in_bed_file = False
-            review['disease'] = sample[4]
+            reviewer_in_bed_file = 'reviewer' in review.columns
+            review['disease'] = sample[5]
+            if reviewer_specified_in_sample:
+                review['reviewer'] = sample[4]
             self.review = pd.concat([self.review, review], ignore_index=True)
             bed_one_based_f_path = sample[3] + '.one_based'
             print('Processing tumor bam file:\n\t{0}'.format(sample[1]))
             tumor_readcount_file_path = '{0}/{1}_tumor' \
-                                        '.readcounts'.format(output_dir_path,
+                                        '.readcounts'.format(out_dir_path,
                                                              sample[0])
             if not skip_readcount:
                 os.system('bam-readcount -i -w 0 -l {0} -f {1} '
-                          '{2} > {3}'.format(sites_file_path, sample[5],
+                          '{2} > {3}'.format(sites_file_path, sample[6],
                                              sample[1],
                                              tumor_readcount_file_path))
 
@@ -99,38 +101,49 @@ class PrepareData:
             tumor_data = tumor_rc.compute_variant_metrics(bed_one_based_f_path,
                                                           'tumor',
                                                           reviewer_in_bed_file,
-                                                          sample[4])
-
+                                                          sample[5])
             print('Processing normal bam file:\n\t{0}'.format(sample[2]))
             normal_readcount_file_path = '{0}/{1}_normal' \
-                                         '.readcounts'.format(output_dir_path,
+                                         '.readcounts'.format(out_dir_path,
                                                               sample[0])
             if not skip_readcount:
                 os.system('bam-readcount -i -w 0 -l {0} -f {1} '
-                          '{2} > {3}'.format(sites_file_path, sample[5],
+                          '{2} > {3}'.format(sites_file_path, sample[6],
                                              sample[2],
                                              normal_readcount_file_path))
             normal_rc = ReadCount(normal_readcount_file_path)
             normal_data = normal_rc.\
                 compute_variant_metrics(bed_one_based_f_path, 'normal',
-                                        reviewer_in_bed_file, sample[4])
+                                        reviewer_in_bed_file, sample[5])
             if len(tumor_data) != len(normal_data):
                 raise ValueError(
                     'Dataframes cannot be merged. They are differing lengths.')
-
-            individual_df = pd.merge(tumor_data, normal_data,
-                                     on=['chromosome', 'start', 'stop',
-                                         'ref', 'var', 'call', 'disease'])
-
+            if reviewer_in_bed_file:
+                individual_df = pd.merge(tumor_data, normal_data,
+                                         on=['chromosome', 'start', 'stop',
+                                             'ref', 'var', 'call', 'disease',
+                                             'reviewer'])
+            elif reviewer_specified_in_sample:
+                individual_df = pd.merge(tumor_data, normal_data,
+                                         on=['chromosome', 'start', 'stop',
+                                             'ref', 'var', 'call', 'disease'])
+                individual_df['reviewer'] = sample[4]
+            else:
+                individual_df = pd.merge(tumor_data, normal_data,
+                                         on=['chromosome', 'start', 'stop',
+                                             'ref', 'var', 'call', 'disease'])
             individual_df.index = (sample[0] + '~' + individual_df.chromosome +
                                    ':' + individual_df.start.map(str) + '-' +
                                    individual_df.stop.map(str) +
                                    individual_df.ref + '>' +
                                    individual_df['var'])
             self.training_data = pd.concat([self.training_data, individual_df])
+
         self.training_data.drop(['chromosome', 'start', 'stop', 'ref', 'var'],
                                 axis=1, inplace=True)
         self._perform_one_hot_encoding('disease')
+        if reviewer_specified_in_sample or reviewer_in_bed_file:
+            self._perform_one_hot_encoding('reviewer')
         self.calls = self.training_data.pop('call')
 
         # normalize continuous variables
@@ -181,7 +194,6 @@ class PrepareData:
                    'tumor_var_num_minus_strand', 'tumor_var_num_plus_strand',
                    'tumor_var_num_q2_containing_reads']
         to_normalize = self.training_data[columns]
-
         # Source http://stackoverflow.com/a/26415620
         x = to_normalize.values
         min_max_scaler = preprocessing.MinMaxScaler()
@@ -191,8 +203,8 @@ class PrepareData:
         self.training_data = pd.concat(
             [self.training_data[self.categorical_columns], scaled], axis=1)
         self.training_data.to_pickle(
-            os.path.join(self.output_dir_path, 'train.pkl'))
-        self.calls.to_pickle(os.path.join(self.output_dir_path, 'call.pkl'))
+            os.path.join(self.out_dir_path, 'train.pkl'))
+        self.calls.to_pickle(os.path.join(self.out_dir_path, 'call.pkl'))
 
     def _perform_one_hot_encoding(self, column):
         """perform one-hot encoding on categorical variables
@@ -214,8 +226,13 @@ class PrepareData:
         manual_review.columns = map(str.lower, manual_review.columns)
         manual_review.rename(columns={'reference': 'ref', 'variant': 'var'},
                              inplace=True)
-        manual_review = manual_review[['chromosome', 'start', 'stop',
-                                       'ref', 'var', 'call']]
+        if 'reviewer' in manual_review.columns:
+            manual_review = manual_review[['chromosome', 'start', 'stop',
+                                           'ref', 'var', 'call',
+                                           'reviewer']]
+        else:
+            manual_review = manual_review[['chromosome', 'start', 'stop',
+                                           'ref', 'var', 'call']]
         manual_review = manual_review.apply(self._convert_one_based, axis=1)
         manual_review = manual_review.replace('', np.nan).dropna(how='all')
         manual_review[['chromosome', 'start', 'stop']].to_csv(sites_file_path,
