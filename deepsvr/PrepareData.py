@@ -224,15 +224,23 @@ class PrepareData:
                            sample_name):
         manual_review = pd.read_csv(manual_review_file_path, sep='\t')
         manual_review.columns = map(str.lower, manual_review.columns)
-        manual_review.rename(columns={'reference': 'ref', 'variant': 'var'},
+        manual_review.rename(columns={'reference': 'ref', 'variant': 'var',
+                                      'chr': 'chromosome', 'end': 'stop'},
                              inplace=True)
-        if 'reviewer' in manual_review.columns:
-            manual_review = manual_review[['chromosome', 'start', 'stop',
-                                           'ref', 'var', 'call',
-                                           'reviewer']]
-        else:
-            manual_review = manual_review[['chromosome', 'start', 'stop',
-                                           'ref', 'var', 'call']]
+        try:
+            if 'reviewer' in manual_review.columns:
+                manual_review = manual_review[['chromosome', 'start', 'stop',
+                                               'ref', 'var', 'call',
+                                               'reviewer']]
+            else:
+                manual_review = manual_review[['chromosome', 'start', 'stop',
+                                               'ref', 'var', 'call']]
+        except KeyError as e:
+            raise ValueError('Manual review file header mislabeled for sample',
+                  sample_name,'. Expected header with values chromosome, '
+                              'start, stop, ref, var, call, and '
+                              'reviewer(optional). The following value was '
+                              'passed: ', e.args[0])
         manual_review = manual_review.apply(self._convert_one_based, axis=1)
         manual_review = manual_review.replace('', np.nan).dropna(how='all')
         manual_review[['chromosome', 'start', 'stop']].to_csv(sites_file_path,
