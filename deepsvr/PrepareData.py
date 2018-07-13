@@ -16,7 +16,7 @@ class PrepareData:
     """
 
     def __init__(self, samples_file_path, header, out_dir_path,
-                 skip_readcount):
+                 skip_readcount, ignore_reviewer=True):
         """Assemble pandas.Dataframe of data
 
             Args:
@@ -26,18 +26,22 @@ class PrepareData:
                                          sites file path (this should be a
                                          one-based tsv file containing
                                          chromosome, start, and stop),
-                                         disease, reference fasta file path
+                                         boolean indicating a solid tumor or
+                                         liquid tumor, and reference fasta file
+                                          path
                 header (bool): True if header False otherwise.
                 out_dir_path (str): path for output directory
                 skip_readcount (bool): skip the read counting step by reading
                                        in the read count files from a prior run
                                        in the output directory.
+                ignore_reviewer (bool): True to remove the reviewer feature.
+                                        Default is True.
         """
         self._parse_samples_file(samples_file_path, header)
         self.out_dir_path = out_dir_path
         self.training_data = pd.DataFrame()
         self.categorical_columns = list()
-        self._run_bam_readcount(skip_readcount)
+        self._run_bam_readcount(skip_readcount, ignore_reviewer)
 
     def _parse_samples_file(self, samples_file_path, header):
         """Parse samples
@@ -49,7 +53,9 @@ class PrepareData:
                                          sites file path (this should be a
                                          one-based tsv file containing
                                          chromosome, start, and stop),
-                                         disease, reference fasta file path
+                                         boolean indicating a solid tumor or
+                                         liquid tumor, reference fasta file
+                                         path
                 header (bool): True if header False otherwise.
         """
         with open(samples_file_path) as f:
@@ -60,7 +66,7 @@ class PrepareData:
                 samples.pop(0)
         self.samples = samples
 
-    def _run_bam_readcount(self, skip_readcount):
+    def _run_bam_readcount(self, skip_readcount, ignore_reviewer=True):
         """Run bam-readcount on created sites file. Concatenate review calls.
 
             Args:
@@ -81,7 +87,7 @@ class PrepareData:
             review = self._parse_review_file(sample[3], sites_file_path,
                                              sample[0])
             reviewer_in_bed_file = 'reviewer' in review.columns
-            review['disease'] = sample[5]
+            review['solid_tumor'] = sample[5]
             if reviewer_specified_in_sample:
                 review['reviewer'] = sample[4]
             self.review = pd.concat([self.review, review], ignore_index=True)
@@ -101,7 +107,7 @@ class PrepareData:
             tumor_data = tumor_rc.compute_variant_metrics(bed_one_based_f_path,
                                                           'tumor',
                                                           reviewer_in_bed_file,
-                                                          sample[5])
+                                                          int(sample[5]))
             print('Processing normal bam file:\n\t{0}'.format(sample[2]))
             normal_readcount_file_path = '{0}/{1}_normal' \
                                          '.readcounts'.format(out_dir_path,
@@ -114,24 +120,32 @@ class PrepareData:
             normal_rc = ReadCount(normal_readcount_file_path)
             normal_data = normal_rc.\
                 compute_variant_metrics(bed_one_based_f_path, 'normal',
-                                        reviewer_in_bed_file, sample[5])
+                                        reviewer_in_bed_file, int(sample[5]))
             if len(tumor_data) != len(normal_data):
                 raise ValueError(
                     'Dataframes cannot be merged. They are differing lengths.')
             if reviewer_in_bed_file:
                 individual_df = pd.merge(tumor_data, normal_data,
                                          on=['chromosome', 'start', 'stop',
-                                             'ref', 'var', 'call', 'disease',
-                                             'reviewer'])
+                                             'ref', 'var', 'call',
+                                             'solid_tumor', 'reviewer'])
             elif reviewer_specified_in_sample:
                 individual_df = pd.merge(tumor_data, normal_data,
                                          on=['chromosome', 'start', 'stop',
-                                             'ref', 'var', 'call', 'disease'])
+                                             'ref', 'var', 'call',
+                                             'solid_tumor'])
                 individual_df['reviewer'] = sample[4]
             else:
                 individual_df = pd.merge(tumor_data, normal_data,
                                          on=['chromosome', 'start', 'stop',
-                                             'ref', 'var', 'call', 'disease'])
+                                             'ref', 'var', 'call',
+                                             'solid_tumor'])
+            try:
+                if ignore_reviewer:
+                    individual_df.drop('reviewer', axis=1, inplace=True)
+            except ValueError:
+                # If reviewer is not in axis continue
+                pass
             individual_df.index = (sample[0] + '~' + individual_df.chromosome +
                                    ':' + individual_df.start.map(str) + '-' +
                                    individual_df.stop.map(str) +
@@ -141,8 +155,9 @@ class PrepareData:
 
         self.training_data.drop(['chromosome', 'start', 'stop', 'ref', 'var'],
                                 axis=1, inplace=True)
-        self._perform_one_hot_encoding('disease')
-        if reviewer_specified_in_sample or reviewer_in_bed_file:
+        self.categorical_columns = self.categorical_columns + ['solid_tumor']
+        if not ignore_reviewer and (reviewer_specified_in_sample or
+                                    reviewer_in_bed_file):
             self._perform_one_hot_encoding('reviewer')
         self.calls = self.training_data.pop('call')
 
@@ -215,7 +230,8 @@ class PrepareData:
         """
         get_dummies = pd.get_dummies(
             self.training_data[column], prefix=column)
-        self.categorical_columns += get_dummies.columns.values.tolist()
+        dum_col_names = get_dummies.columns.values.tolist()
+        self.categorical_columns = self.categorical_columns + dum_col_names
         self.training_data = pd.concat([self.training_data, get_dummies],
                                        axis=1)
         self.training_data.drop(column, axis=1, inplace=True)
@@ -237,18 +253,21 @@ class PrepareData:
                                                'ref', 'var', 'call']]
         except KeyError as e:
             raise ValueError('Manual review file header mislabeled for sample',
-                  sample_name,'. Expected header with values chromosome, '
-                              'start, stop, ref, var, call, and '
-                              'reviewer(optional). The following value was '
-                              'passed: ', e.args[0])
+                             sample_name, '. Expected header with values '
+                                          'chromosome, start, stop, ref, var, '
+                                          'call, and reviewer(optional). The '
+                                          'following value was passed: ',
+                             e.args[0])
         manual_review = manual_review.apply(self._convert_one_based, axis=1)
         manual_review = manual_review.replace('', np.nan).dropna(how='all')
         manual_review[['chromosome', 'start', 'stop']].to_csv(sites_file_path,
                                                               sep='\t',
                                                               index=False,
                                                               header=False)
-        manual_review.to_csv(manual_review_file_path+'.one_based', sep='\t',
-                             index=False, header=True)
+        manual_review_file_name = manual_review_file_path.split('/')[-1]
+        manual_review.to_csv(os.path.join(
+            self.out_dir_path, manual_review_file_name+'.one_based'),
+            sep='\t', index=False, header=True)
         return manual_review
 
     def _convert_one_based(self, row):
