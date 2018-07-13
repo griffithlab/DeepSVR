@@ -1,1 +1,1 @@
-tst1	./deepsvr/tests/test_data/tst1.exome.tumor.bam	./deepsvr/tests/test_data/tst1.exome.normal.bam	./deepsvr/tests/test_data/tst1.review		BRC	~/grch37.fa
+tst1	./deepsvr/tests/test_data/tst1.exome.tumor.bam	./deepsvr/tests/test_data/tst1.exome.normal.bam	./deepsvr/tests/test_data/tst1.review		1	~/grch37.fa
