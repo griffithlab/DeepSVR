@@ -181,8 +181,7 @@ setup(
     # executes the function `main` from this package when invoked:
     entry_points={  # Optional
         'console_scripts': [
-            'deepsvr=deepsvr.cli:main',
-            'createclassifier=deepsvr.CreateClassifier:main',
+            'deepsvr=deepsvr.cli:main'
         ],
     },
 
