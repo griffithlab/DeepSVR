@@ -1,6 +1,6 @@
 package:
   name: deepsvr
-  version: "0.0.1"
+  version: "0.1.0"
 
 source:
   path: .
@@ -15,7 +15,7 @@ build:
 
 requirements:
   build:
-    - python
+    - python>3
     - setuptools
     - nose
     - flake8
@@ -32,7 +32,7 @@ requirements:
     - scikit-learn
     - h5py
   run:
-    - python
+    - python>3
     - bam-readcount
     - pandas
     - numpy
