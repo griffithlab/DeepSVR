@@ -1,6 +1,6 @@
 package:
-  name: manual_review_classifier
-  version: "0.0.1"
+  name: deepsvr
+  version: "0.1.0"
 
 source:
   path: .
@@ -11,11 +11,11 @@ build:
     - nosetests --verbose
     - python setup.py install
   entry_points:
-    - prepare_manual_review_classifier_data = manual_review_classifier.cli:main
+    - deepsvr = deepsvr.cli:main
 
 requirements:
   build:
-    - python
+    - python>3
     - setuptools
     - nose
     - flake8
@@ -27,18 +27,32 @@ requirements:
     - bam-readcount
     - convert_zero_one_based
     - click
-  run:
-    - python
-    - bam-readcount
+    - tensorflow
+    - keras
     - scikit-learn
+    - h5py
+  run:
+    - python>3
+    - bam-readcount
+    - pandas
+    - numpy
+    - scikit-learn
+    - matplotlib
+    - seaborn
+    - convert_zero_one_based
+    - click
+    - tensorflow
+    - keras
+    - scikit-learn
+    - h5py
 
 test:
   requires:
     - nose
   imports:
-    - manual_review_classifier
+    - deepsvr
 
 
 about:
-  home: https://github.com/bainscou/manual_review_classifier
+  home: https://github.com/griffithlab/deepsvr
   license: MIT
