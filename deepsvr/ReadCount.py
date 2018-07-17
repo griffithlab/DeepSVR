@@ -1,6 +1,8 @@
 import re
+
 import pandas as pd
-from manual_review_classifier.utils import to_numeric
+
+from deepsvr.utils import to_numeric
 
 BASE_METRICS = ['count', 'avg_mapping_quality', 'avg_basequality',
                 'avg_se_mapping_quality', 'num_plus_strand',
@@ -56,7 +58,7 @@ class ReadCount:
 
     def compute_variant_metrics(self, var_bed_file_path,
                                 sample_prepend_string, bed_contains_reviewer,
-                                disease):
+                                solid_tumor):
         """
 
         Args:
@@ -65,7 +67,7 @@ class ReadCount:
                                          tumor
             bed_contains_reviewer (bool): Manual review file contains reviewer
                                           in seventh column
-            disease (str): Cancer type associated with each sample.
+            solid_tumor (str): Cancer type associated with each sample.
 
         Returns:
              pandas.Dataframe of variant centric read count data
@@ -170,7 +172,7 @@ class ReadCount:
                     self.read_count_dict[bam_readcount_site]['depth']
                 if bed_contains_reviewer:
                     self.read_count_dict[variant_site]['reviewer'] = reviewer
-                self.read_count_dict[variant_site]['disease'] = disease
+                self.read_count_dict[variant_site]['solid_tumor'] = solid_tumor
 
         # This will delete all the bam-readcount keys including count of
         # other positions from indels. This dropping the counts at other
