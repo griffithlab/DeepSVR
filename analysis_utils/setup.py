@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='manual_review_classifier',
+    name='deepsvr',
     version='0.0.1',
     description='Manual review processing',
-    url='https://github.com/bainscou/manual_review_classifier',
+    url='https://github.com/griffithlab/deepsvr',
     author='Ben Ainscough',
     author_email='b.ainscough@wustl.edu',
     license='MIT',
