@@ -15,7 +15,7 @@ build:
 
 requirements:
   build:
-    - python>3
+    - python3
     - setuptools
     - nose
     - flake8
@@ -32,7 +32,7 @@ requirements:
     - scikit-learn
     - h5py
   run:
-    - python>3
+    - python3
     - bam-readcount
     - pandas
     - numpy
