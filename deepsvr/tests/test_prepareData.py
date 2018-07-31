@@ -60,22 +60,22 @@ class TestPrepareData(TestCase):
         self.assertEqual(file_len(os.path.join(TEST_DATA_BASE_DIR,
                                                'training_data', 'readcounts',
                                                'tst1_normal.readcounts')),
-                         443)
+                         10)
         self.assertEqual(file_len(os.path.join(TEST_DATA_BASE_DIR,
                                                'training_data', 'readcounts',
                                                'tst1_tumor.readcounts')),
-                         443)
+                         10)
         # all variants are successfully parsed from the readcount files
-        self.assertEqual(len(self.samples_noheader.training_data), 443)
+        self.assertEqual(len(self.samples_noheader.training_data), 10)
         # training data has the expected number of feature columns
         self.assertEqual(len(self.samples_noheader.training_data.columns), 59)
         self.assertEqual(
             round(self.samples_noheader.training_data.values.max(), 3), 1)
         # all variants are successfully parsed from the readcount files
-        self.assertEqual(len(self.no_reviewer.training_data), 443)
+        self.assertEqual(len(self.no_reviewer.training_data), 10)
         # training data has the expected number of feature columns
         self.assertEqual(len(self.no_reviewer.training_data.columns), 59)
         # all variants are successfully parsed from the readcount files
-        self.assertEqual(len(self.sample_reviewer.training_data), 443)
+        self.assertEqual(len(self.sample_reviewer.training_data), 10)
         # training data has the expected number of feature columns
         self.assertEqual(len(self.sample_reviewer.training_data.columns), 59)
