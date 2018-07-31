@@ -15,7 +15,7 @@ class TestReadCount(TestCase):
                              '/tst1_tumor.readcounts')
 
     def test__parse(self):
-        self.assertEqual(443, len(self.read_count.read_count_dict))
+        self.assertEqual(10, len(self.read_count.read_count_dict))
 
     def test_compute_variant_metrics(self):
         data = self.read_count.compute_variant_metrics(TEST_DATA_ROOT +
