@@ -1,6 +1,5 @@
-import pkg_resources
 import click
-
+import deepsvr
 from deepsvr.PrepareData import PrepareData
 from deepsvr.ClassifyData import classify_samples
 from deepsvr.CreateClassifier import create_classifier
@@ -9,9 +8,7 @@ from deepsvr.CreateClassifier import create_classifier
 def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
-    version = pkg_resources.\
-        get_distribution('deepsvr').version
-    click.echo(version)
+    click.echo(deepsvr.__version__)
     ctx.exit()
 
 
