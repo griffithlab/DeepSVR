@@ -1,10 +1,8 @@
 # Import Tools
 import pandas as pd
-import os
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.regularizers import l2
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
 def create_classifier(training_file_path, label_file_path, model_out_file_path,
