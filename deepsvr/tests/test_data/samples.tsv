@@ -1,2 +1,2 @@
 sample_name	tumor_bam	normal_bam	manual_review	reviewer	solid_tumor	reference_fasta_file_path
-tst1	./deepsvr/tests/test_data/tst1.exome.tumor.bam	./deepsvr/tests/test_data/tst1.exome.normal.bam	./deepsvr/tests/test_data/tst1.review		1	~/grch37.fa
+tst1	./deepsvr/tests/test_data/tst1.exome.tumor.bam	./deepsvr/tests/test_data/tst1.exome.normal.bam	./deepsvr/tests/test_data/tst1.review		1	./deepsvr/tests/test_data/chr22.fa
