@@ -134,9 +134,9 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['click', 'setuptools', 'pandas', 'numpy', 'h5py',
-                      'convert_zero_one_based', 'scikit-learn', 'keras',
-                      'tensorflow', 'seaborn', 'matplotlib'],  # Optional
+    # install_requires=['click', 'setuptools', 'pandas', 'numpy', 'h5py',
+    #                   'convert_zero_one_based', 'scikit-learn', 'keras',
+    #                   'tensorflow', 'seaborn', 'matplotlib'],  # Optional
 
     # dependency_links=['git+https://github.com/griffithlab/'
     # 'convert_zero_one_based.git#egg=convert_zero_one_based-0.0.1'],
@@ -158,12 +158,12 @@ setup(
     #
     # If using Python 2.6 or earlier, then these have to be included in
     # MANIFEST.in as well.
-    package_data={  # Optional
-        'classifier': ['deep_learning_classifier.json'],
-        'model': ['model.h5'],
-    },
+    # package_data={  # Optional
+    #     'classifier': ['deepsvr/data/deep_learning_classifier.json'],
+    #     'model': ['deepsvr/data/model.h5'],
+    # },
 
-    python_requires='>=3',
+    # python_requires='>=3',
 
     # Although 'package_data' is the preferred approach, in some case you may
     # need to place data files outside of your packages. See:
@@ -179,11 +179,9 @@ setup(
     #
     # For example, the following would provide a command called `sample` which
     # executes the function `main` from this package when invoked:
-    entry_points={  # Optional
-        'console_scripts': [
-            'deepsvr=deepsvr.cli:main'
-        ],
-    },
+    # entry_points={  # Optional
+    #
+    # },
 
     # List additional URLs that are relevant to your project as a dict.
     #
