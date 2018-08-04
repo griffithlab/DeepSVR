@@ -5,8 +5,15 @@ This repository can be used to recapitulate the development and analysis of a ma
 
 ### Installation of DeepSVR
 
-1) Compile and install [bam-readcount](https://github.com/genome/bam-readcount#build-instructions)
-2) Install DeepSVR with pip:  `pip install deepsvr`
+1. Install Anaconda
+    - wget https://repo.anaconda.com/archive/Anaconda3-5.2.0-Linux-x86_64.sh
+    - bash Anaconda3-5.2.0-Linux-x86_64.sh
+    - Note: you might need to restart your window to ensure installation
+2. Add BioConda Channel
+    - conda config --add channels bioconda
+3. Install DeepSVR
+    - conda install deepsvr
+
 
 ### Test
 
