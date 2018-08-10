@@ -3,19 +3,21 @@ This repository can be used to recapitulate the development and analysis of a ma
 
 ### A walk-through of the DeepSVR repo can be found on the [Wiki page](https://github.com/griffithlab/manual_review_classifier/wiki). 
 
-### Installation of DeepSVR
 
-1. Install Anaconda
-    - wget https://repo.anaconda.com/archive/Anaconda3-5.2.0-Linux-x86_64.sh
-    - bash Anaconda3-5.2.0-Linux-x86_64.sh
-    - Note: you might need to restart your window to ensure installation
-2. Add BioConda Channel
-    - conda config --add channels bioconda
-3. Install DeepSVR
-    - conda install deepsvr
+### Installation of deepsvr package
+*Note: Please ensure that you are running these commands using python3 or greater.*
 
+#### 1) Clone the DeepSVR GitHub Repo see [Repository - Installation](https://github.com/griffithlab/DeepSVR/wiki/Repository-Installation)
 
-### Test
+#### 2) Install Anaconda see [Downloads - Anaconda](https://www.anaconda.com/download/)
 
-To run tests Download GRCH37 fasta and fasta index file to home directory as 
-'\~/grch37.fa' and '\~/grch37.fa.fai'
+#### 3) Add BioConda Channels
+`conda config --add channels defaults`  
+`conda config --add channels conda-forge` 
+`conda config --add channels bioconda`  
+
+#### 4) Install DeepSVR see [BioConda - DeepSVR](https://anaconda.org/bioconda/deepsvr)
+`conda install deepsvr`
+
+#### 5) Test installation and view DeepSVR options
+`deepsvr --help`
