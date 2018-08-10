@@ -13,7 +13,9 @@ This repository can be used to recapitulate the development and analysis of a ma
 
 #### 3) Add BioConda Channels
 `conda config --add channels defaults`  
-`conda config --add channels conda-forge` 
+
+`conda config --add channels conda-forge`  
+
 `conda config --add channels bioconda`  
 
 #### 4) Install DeepSVR see [BioConda - DeepSVR](https://anaconda.org/bioconda/deepsvr)
