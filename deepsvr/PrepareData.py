@@ -264,10 +264,8 @@ class PrepareData:
                                                               sep='\t',
                                                               index=False,
                                                               header=False)
-        manual_review_file_name = manual_review_file_path.split('/')[-1]
-        manual_review.to_csv(os.path.join(
-            self.out_dir_path, manual_review_file_name+'.one_based'),
-            sep='\t', index=False, header=True)
+        manual_review.to_csv(manual_review_file_path+'.one_based',
+                             sep='\t', index=False, header=True)
         return manual_review
 
     def _convert_one_based(self, row):
