@@ -27,7 +27,7 @@ This repository can be used to recapitulate the development and analysis of a ma
 #### 1) Clone the DeepSVR GitHub Repo see [Repository - Installation](https://github.com/griffithlab/DeepSVR/wiki/Repository-Installation)
 
 #### 2) Build docker image
-    docker build -t deepsrv .
+    docker build -t deepsvr .
 
 #### 3) Test installation and view DeepSVR options
     docker run deepsvr --help
